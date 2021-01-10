@@ -1,0 +1,6 @@
+[submodule "https:/github.com/whoshuu/cpr"]
+	path = https:/github.com/whoshuu/cpr
+	url = ./third_party/cpr
+[submodule "https:/github.com/nlohmann/json"]
+	path = https:/github.com/nlohmann/json
+	url = ./third_party/json

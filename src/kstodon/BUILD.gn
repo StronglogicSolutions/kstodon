@@ -1,0 +1,52 @@
+config("inih") {
+  include_dirs = [
+    "//third_party/inih/cpp",
+  ]
+}
+
+config("json") {
+  include_dirs = [
+    "//third_party/json/include",
+  ]
+}
+
+config("html") {
+  include_dirs = [
+    "//third_party/HtmlBuilder/include"
+  ]
+}
+
+source_set("ini_reader") {
+  sources = [
+    "//third_party/inih/ini.c",
+    "//third_party/inih/cpp/INIReader.cpp",
+  ]
+}
+
+source_set("kstodon_sources") {
+
+  deps = [
+    ":ini_reader"
+  ]
+
+  public_configs = [
+    ":inih",
+    ":json",
+    ":html"
+  ]
+
+  include_dirs = [
+    "//src",
+  ]
+
+  libs = [
+    "crypto",
+    "cpr",
+    "curl",
+  ]
+
+  sources = [
+    "//src/kstodon/kstodon.cpp",
+  ]
+}
+

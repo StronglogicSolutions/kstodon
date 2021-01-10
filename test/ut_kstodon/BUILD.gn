@@ -1,0 +1,26 @@
+executable("ut_kstodon") {
+
+  public_deps = [
+    "//src/kstodon:kstodon_sources"
+  ]
+  testonly = true
+
+  libs = [
+    "cpr"
+  ]
+
+
+  deps = [
+    "//test:gtest_main",
+    "//test:gtest_and_gmock"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  sources = [
+    "kstodon.test.cpp",
+  ]
+}
