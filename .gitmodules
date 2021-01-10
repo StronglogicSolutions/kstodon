@@ -4,3 +4,9 @@
 [submodule "https:/github.com/nlohmann/json"]
 	path = https:/github.com/nlohmann/json
 	url = ./third_party/json
+[submodule "third_party/cpr"]
+	path = third_party/cpr
+	url = https://github.com/whoshuu/cpr
+[submodule "third_party/json"]
+	path = third_party/json
+	url = https://github.com/nlohmann/json
