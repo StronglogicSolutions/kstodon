@@ -14,6 +14,65 @@ inline const std::string get_executable_cwd() {
   return std::string{path, path + strlen(path) - strlen(name)};
 }
 
+struct AccountField {
+std::string name;
+std::string value;
+};
+
+struct Account {
+std::string               id;
+std::string               username;
+std::string               acct;
+std::string               display_name;
+std::string               locked;
+std::string               bot;
+std::string               discoverable;
+std::string               group;
+std::string               created_at;
+std::string               note;
+std::string               url;
+std::string               avatar;
+std::string               header;
+std::string               header_static;
+uint32_t                  followers_count;
+uint32_t                  following_count;
+uint32_t                  statuses_count;
+std::string               last_status_at;
+std::vector<AccountField> fields;
+};
+
+inline Account ParseAccountFromJSON(nlohmann::json data) {
+  Account account{};
+  account.id              = SanitizeJSON(data["id"].dump());
+  account.username        = SanitizeJSON(data["username"].dump());
+  account.acct            = SanitizeJSON(data["acct"].dump());
+  account.display_name    = SanitizeJSON(data["display_name"].dump());
+  account.locked          = SanitizeJSON(data["locked"].dump());
+  account.bot             = SanitizeJSON(data["bot"].dump());
+  account.discoverable    = SanitizeJSON(data["discoverable"].dump());
+  account.group           = SanitizeJSON(data["group"].dump());
+  account.created_at      = SanitizeJSON(data["created_at"].dump());
+  account.note            = SanitizeJSON(data["note"].dump());
+  account.url             = SanitizeJSON(data["url"].dump());
+  account.avatar          = SanitizeJSON(data["avatar"].dump());
+  account.header          = SanitizeJSON(data["header"].dump());
+  account.followers_count = std::stoi(SanitizeJSON(data["followers_count"].dump()));
+  account.following_count = std::stoi(SanitizeJSON(data["following_count"].dump()));
+  account.statuses_count  = std::stoi(SanitizeJSON(data["statuses_count"].dump()));
+  account.last_status_at = SanitizeJSON(data["last_status_at"].dump());
+
+  nlohmann::json fields = data["source"]["fields"];
+
+  for (const auto& field : fields) {
+    account.fields.emplace_back(AccountField{
+      .name  = SanitizeJSON(field["name"].dump()),
+      .value = SanitizeJSON(field["value"].dump())
+    });
+  }
+
+  return account;
+}
+
 struct Credentials {
 std::string id;
 std::string name;
@@ -236,11 +295,14 @@ bool VerifyToken() {
     if (!r.text.empty()) {
       log(r.text);
 
-      // TODO: Parse the following from text:
-      /**
-       * {"id":"154950","username":"logicp","acct":"logicp","display_name":"Rajinder","locked":false,"bot":false,"discoverable":null,"group":false,"created_at":"2021-01-09T04:13:14.779Z","note":"\u003cp\u003e🇮🇳 software and systems architect / musician. former personal trainer and public servant\u003c/p\u003e","url":"https://mastodon.online/@logicp","avatar":"https://files.mastodon.online/accounts/avatars/000/154/950/original/77ebf6320684a8ef.png","avatar_static":"https://files.mastodon.online/accounts/avatars/000/154/950/original/77ebf6320684a8ef.png","header":"https://files.mastodon.online/accounts/headers/000/154/950/original/9fd1ba851641386b.png","header_static":"https://files.mastodon.online/accounts/headers/000/154/950/original/9fd1ba851641386b.png","followers_count":7,"following_count":12,"statuses_count":21,"last_status_at":"2021-01-11","source":{"privacy":"public","sensitive":false,"language":null,"note":"🇮🇳 software and systems architect / musician. former personal trainer and public servant","fields":[{"name":"System","value":"Linux","verified_at":null},{"name":"Music","value":"Classical Jazz Flamenco","verified_at":null},{"name":"Languages","value":"Eng, Fra, Kor, NL, C++","verified_at":null},{"name":"Train daily","value":"easily","verified_at":null}],"follow_requests_count":0},"emojis":[],"fields":[{"name":"System","value":"Linux","verified_at":null},{"name":"Music","value":"Classical Jazz Flamenco","verified_at":null},{"name":"Languages","value":"Eng, Fra, Kor, NL, C++","verified_at":null},{"name":"Train daily","value":"easily","verified_at":null}]}
-       *
-       */
+      Account account = ParseAccountFromJSON(
+        nlohmann::json::parse(
+          r.text, nullptr, constants::JSON_PARSE_NO_THROW
+        )
+      );
+
+      m_account = account;
+
       return true;
     }
   }
@@ -274,6 +336,7 @@ Credentials get_credentials() {
 private:
 Credentials  m_credentials;
 Auth         m_auth;
+Account      m_account;
 bool         m_authenticated;
 };
 
