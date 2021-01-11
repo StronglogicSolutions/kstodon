@@ -9,11 +9,21 @@ const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
 const std::string CONFIG_JSON_PATH{"config/credentials.json"};
 const std::string TOKEN_JSON_PATH{"config/token.json"};
 
+const uint8_t HEADER_AUTH_INDEX = 0x00;
+
+const std::vector<std::string> HEADER_NAMES{
+"Authorization"
+};
+
 namespace MastodonOnline {
-const uint8_t TOKEN_INDEX = 0x00;
+const uint8_t TOKEN_INDEX        = 0x00;
+const uint8_t TOKEN_VERIFY_INDEX = 0x01;
+
 const std::string BASE_URL{"https://mastodon.online"};
+
 const std::vector<std::string> PATH{
-  "/oauth/token"
+  "/oauth/token",
+  "/api/v1/accounts/verify_credentials"
 };
 } // namespace MastodonOnline
 } // namespace constants

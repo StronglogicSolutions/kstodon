@@ -216,17 +216,55 @@ bool FetchToken() {
   return false;
 }
 
+bool VerifyToken() {
+  using namespace constants;
+  using namespace constants::MastodonOnline;
 
-bool is_authenticated() {
+  const std::string URL = BASE_URL + PATH.at(TOKEN_VERIFY_INDEX);
+
+  // curl \
+	// -H 'Authorization: Bearer our_access_token_here' \
+	// https://mastodon.example/api/v1/accounts/verify_credentials
+  if (m_auth.is_valid()) {
+    cpr::Response r = cpr::Get(
+      cpr::Url{URL},
+      cpr::Header{
+        {HEADER_NAMES.at(HEADER_AUTH_INDEX), GetBearerAuth()}
+     }
+    );
+
+    if (!r.text.empty()) {
+      log(r.text);
+
+      // TODO: Parse the following from text:
+      /**
+       * {"id":"154950","username":"logicp","acct":"logicp","display_name":"Rajinder","locked":false,"bot":false,"discoverable":null,"group":false,"created_at":"2021-01-09T04:13:14.779Z","note":"\u003cp\u003e🇮🇳 software and systems architect / musician. former personal trainer and public servant\u003c/p\u003e","url":"https://mastodon.online/@logicp","avatar":"https://files.mastodon.online/accounts/avatars/000/154/950/original/77ebf6320684a8ef.png","avatar_static":"https://files.mastodon.online/accounts/avatars/000/154/950/original/77ebf6320684a8ef.png","header":"https://files.mastodon.online/accounts/headers/000/154/950/original/9fd1ba851641386b.png","header_static":"https://files.mastodon.online/accounts/headers/000/154/950/original/9fd1ba851641386b.png","followers_count":7,"following_count":12,"statuses_count":21,"last_status_at":"2021-01-11","source":{"privacy":"public","sensitive":false,"language":null,"note":"🇮🇳 software and systems architect / musician. former personal trainer and public servant","fields":[{"name":"System","value":"Linux","verified_at":null},{"name":"Music","value":"Classical Jazz Flamenco","verified_at":null},{"name":"Languages","value":"Eng, Fra, Kor, NL, C++","verified_at":null},{"name":"Train daily","value":"easily","verified_at":null}],"follow_requests_count":0},"emojis":[],"fields":[{"name":"System","value":"Linux","verified_at":null},{"name":"Music","value":"Classical Jazz Flamenco","verified_at":null},{"name":"Languages","value":"Eng, Fra, Kor, NL, C++","verified_at":null},{"name":"Train daily","value":"easily","verified_at":null}]}
+       *
+       */
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool IsAuthenticated() {
   return m_authenticated;
 }
 
-bool has_valid_token() {
+bool HasValidToken() {
   return m_auth.is_valid();
 }
 
-void clear_token() {
+void ClearToken() {
   m_auth = Auth{};
+}
+
+std::string GetBearerAuth() {
+  if (m_auth.access_token.empty())
+    return "";
+  return std::string{"Bearer " + m_auth.access_token};
 }
 
 Credentials get_credentials() {
