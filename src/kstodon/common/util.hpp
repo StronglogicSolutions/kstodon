@@ -10,10 +10,6 @@
 #include <fstream>
 #include <sstream>
 
-namespace constants {
-static const char* SIMPLE_DATE_FORMAT{"%Y-%m-%dT%H:%M:%S"};
-} // namespace constants
-
 /**
  * SaveToFile
  */
@@ -130,109 +126,6 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
     (void)(out);
   }
   return out;
-}
-
-/**
- * to_unixtime
- *
- * @param
- * @returns
- */
-inline const std::time_t to_unixtime(const char* datetime) {
-  std::tm            t{};
-  std::istringstream ss{datetime};
-
-  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
-
-  return mktime(&t);
-}
-
-/**
- * to_readable_time
- *
- * @param
- * @returns
- */
-inline std::string to_readable_time(const char* datetime) {
-  uint8_t            buffer_size{24};
-  std::tm            t{};
-  std::istringstream ss{datetime};
-  char               b[buffer_size];
-  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
-
-  strftime(b, buffer_size, "%B %d %H:%M:%S", &t);
-
-  return std::string{b};
-}
-
-inline std::string get_simple_datetime() {
-  uint8_t            buffer_size{24};
-  char               b[buffer_size];
-  auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  struct tm tm{};
-  if (::gmtime_r(&now, &tm))
-    if (std::strftime(b, sizeof(b), constants::SIMPLE_DATE_FORMAT, &tm))
-      return std::string{b};
-  throw std::runtime_error{"Failed to get current date as string"};
-}
-
-// template <typename T = float>
-inline std::string human_readable_duration(std::chrono::duration<int64_t> delta) {
-  using namespace std;
-  using namespace std::chrono;
-  using days = duration<int, ratio<86400>>;
-
-  std::stringstream ss{};
-
-  char fill = ss.fill();
-  ss.fill('0');
-  auto d = duration_cast<days>(delta);
-  delta -= d;
-  auto h = duration_cast<hours>(delta);
-  delta -= h;
-  auto m = duration_cast<minutes>(delta);
-  delta -= m;
-  auto s = duration_cast<seconds>(delta);
-
-  ss  << setw(2) << d.count() << "d:"
-      << setw(2) << h.count() << "h:"
-      << setw(2) << m.count() << "m:"
-      << setw(2) << s.count() << 's';
-
-  ss.fill(fill);
-
-  return ss.str();
-};
-
-
-// template <typename T = float>
-inline std::string delta_to_string(std::chrono::duration<int64_t, std::nano> d) {
-  return human_readable_duration(std::chrono::duration_cast<std::chrono::seconds>(d));
-}
-
-// template <typename T = float>
-inline std::chrono::duration<int64_t, std::nano> get_datetime_delta(std::string dt1, std::string dt2) {
-  std::tm            t{};
-  std::istringstream ss{dt1};
-  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
-
-  std::chrono::time_point tp_1 = std::chrono::system_clock::from_time_t(mktime(&t));
-
-  ss.clear();
-
-  ss.str(dt2);
-  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
-
-  std::chrono::time_point tp_2 = std::chrono::system_clock::from_time_t(mktime(&t));
-
-  std::chrono::duration<int64_t, std::nano> elapsed = tp_1 - tp_2;
-  return elapsed;
-}
-
-// template <typename T = float>
-inline std::string datetime_delta_string(std::string dt1, std::string dt2) {
-  std::chrono::duration<int64_t, std::nano> datetime_delta = get_datetime_delta(dt1, dt2);
-  return delta_to_string(datetime_delta);
 }
 
 #endif // __UTIL_HPP__

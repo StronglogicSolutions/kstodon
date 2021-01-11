@@ -8,6 +8,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "common/auth/auth.hpp"
+
 namespace kstodon {
 
 /**
@@ -24,6 +26,8 @@ namespace kstodon {
 */
 
 class Client {
+public:
+Client();
 };
 
 } // namespace kstodon
