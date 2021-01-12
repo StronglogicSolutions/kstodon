@@ -39,6 +39,33 @@ uint32_t                  following_count;
 uint32_t                  statuses_count;
 std::string               last_status_at;
 std::vector<AccountField> fields;
+
+friend std::ostream &operator<<(std::ostream& o, const Account& a) {
+  std::string fields{};
+  for (const auto& field : a.fields) fields += "Name: " + field.name + "\nValue: " + field.value;
+
+  o << "ID:           " << a.id              << "\n" <<
+       "Username:     " << a.username        << "\n" <<
+       "Account:      " << a.acct            << "\n" <<
+       "Display Name: " << a.display_name    << "\n" <<
+       "Locked:       " << a.locked          << "\n" <<
+       "Bot:          " << a.bot             << "\n" <<
+       "Discoverable: " << a.discoverable    << "\n" <<
+       "Group:        " << a.group           << "\n" <<
+       "Created:      " << a.created_at      << "\n" <<
+       "Note:         " << a.note            << "\n" <<
+       "URL:          " << a.url             << "\n" <<
+       "Avatar:       " << a.avatar          << "\n" <<
+       "Header:       " << a.header          << "\n" <<
+       "Followers:    " << a.followers_count << "\n" <<
+       "Following:    " << a.following_count << "\n" <<
+       "Statuses:     " << a.statuses_count  << "\n" <<
+       "Last Status:  " << a.last_status_at  << "\n" <<
+
+       "FIELDS\n"       << fields;
+
+  return o;
+}
 };
 
 inline Account ParseAccountFromJSON(nlohmann::json data) {
@@ -331,6 +358,10 @@ std::string GetBearerAuth() {
 
 Credentials get_credentials() {
   return m_credentials;
+}
+
+Account GetAccount() {
+  return m_account;
 }
 
 private:
