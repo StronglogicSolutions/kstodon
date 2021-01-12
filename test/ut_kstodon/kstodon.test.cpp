@@ -36,7 +36,22 @@ TEST(KStodonTests, ClientHasAuth) {
 
   Client client{};
 
-  bool client_has_auth = client.has_auth();
+  bool client_has_auth = client.HasAuth();
 
   EXPECT_TRUE(client_has_auth);
+}
+
+TEST(KStodonTests, FetchStatus) {
+  using namespace kstodon;
+
+  uint32_t TEST_ID{12345};
+
+  Client client{};
+
+  Status status = client.FetchStatus(TEST_ID);
+
+  EXPECT_TRUE(status.id == TEST_ID);
+
+
+
 }
