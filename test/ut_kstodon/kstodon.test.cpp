@@ -15,7 +15,7 @@ TEST(KStodonTests, DISABLED_FetchAuthToken) {
   EXPECT_TRUE(fetch_success);
 }
 
-TEST(KStodonTests, VerifyAuth) {
+TEST(KStodonTests, DISABLED_VerifyAuth) {
   using namespace kstodon;
 
   Authenticator authenticator{};
@@ -29,4 +29,14 @@ TEST(KStodonTests, VerifyAuth) {
   EXPECT_TRUE(has_valid_token);
   EXPECT_TRUE(verified_token);
   EXPECT_EQ(account.username, "logicp");
+}
+
+TEST(KStodonTests, ClientHasAuth) {
+  using namespace kstodon;
+
+  Client client{};
+
+  bool client_has_auth = client.has_auth();
+
+  EXPECT_TRUE(client_has_auth);
 }
