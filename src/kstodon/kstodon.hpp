@@ -31,7 +31,7 @@ virtual bool HasAuth() = 0;
 class MastodonStatusClient {
 public:
 virtual ~MastodonStatusClient() {}
-virtual Status FetchStatus(uint32_t id) = 0;
+virtual Status FetchStatus(uint64_t id) = 0;
 };
 
 /**
@@ -49,7 +49,7 @@ Client();
 virtual ~Client() override {}
 
 virtual bool HasAuth() override;
-virtual Status FetchStatus(uint32_t id) override;
+virtual Status FetchStatus(uint64_t id) override;
 
 private:
 Authenticator m_authenticator;

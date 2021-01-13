@@ -44,7 +44,7 @@ TEST(KStodonTests, ClientHasAuth) {
 TEST(KStodonTests, FetchStatus) {
   using namespace kstodon;
 
-  uint32_t TEST_ID{12345};
+  uint64_t TEST_ID{105528916039043648};
 
   Client client{};
 
