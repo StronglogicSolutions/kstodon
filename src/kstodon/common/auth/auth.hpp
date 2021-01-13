@@ -42,7 +42,7 @@ std::vector<AccountField> fields;
 
 friend std::ostream &operator<<(std::ostream& o, const Account& a) {
   std::string fields{};
-  for (const auto& field : a.fields) fields += "Name: " + field.name + "\nValue: " + field.value;
+  for (const auto& field : a.fields) fields += "\nName: " + field.name + "\nValue: " + field.value;
 
   o << "ID:           " << a.id              << "\n" <<
        "Username:     " << a.username        << "\n" <<
