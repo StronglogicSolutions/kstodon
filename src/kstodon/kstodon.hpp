@@ -12,11 +12,27 @@
 
 namespace kstodon {
 
+struct Status{
+uint32_t id;
+};
+
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ Interfaces ░░░░░░░░░░░░░░░░░░░░░░│
   └───────────────────────────────────────────────────────────┘
 */
+
+class SecureClient {
+public:
+virtual ~SecureClient() {}
+virtual bool HasAuth() = 0;
+};
+
+class MastodonStatusClient {
+public:
+virtual ~MastodonStatusClient() {}
+virtual Status FetchStatus(uint32_t id) = 0;
+};
 
 /**
   @class
@@ -25,9 +41,18 @@ namespace kstodon {
   └───────────────────────────────────────────────────────────┘
 */
 
-class Client {
+class Client : public SecureClient,
+               public MastodonStatusClient {
 public:
 Client();
+
+virtual ~Client() override {}
+
+virtual bool HasAuth() override;
+virtual Status FetchStatus(uint32_t id) override;
+
+private:
+Authenticator m_authenticator;
 };
 
 } // namespace kstodon
