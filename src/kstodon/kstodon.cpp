@@ -26,6 +26,8 @@ Status Client::FetchStatus(uint64_t id) {
     cpr::Url{STATUSES_URL}
   );
 
+  log(r.text);
+
   if (!r.text.empty()) {
     return JSONToStatus(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
   }

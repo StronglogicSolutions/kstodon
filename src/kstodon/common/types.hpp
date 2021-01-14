@@ -9,6 +9,18 @@
 
 #include "util.hpp"
 
+inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
+  if (!data.is_null() && data.contains(key) && !data[key].is_null())
+    return data[key].get<std::string>();
+  return "";
+}
+
+inline bool GetJSONBoolValue(nlohmann::json data, std::string key) {
+  if (!data.is_null() && data.contains(key) && !data[key].is_null())
+    return data[key].get<bool>();
+  return "";
+}
+
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░░ STRUCTS ░░░░░░░░░░░░░░░░░░░░░░░│
@@ -198,9 +210,9 @@ std::string              content;
 std::string              reblog;
 Application              application;
 Account                  account;
-Media                    media;
+std::vector<Media>       media;
 std::vector<std::string> mentions;
-std::vector<Tag>        tags;
+std::vector<Tag>         tags;
 std::vector<std::string> emojis;
 Card                     card;
 Poll                     poll;
@@ -220,58 +232,54 @@ inline std::vector<Tag> ParseTagsFromJSON(nlohmann::json data) {
   return tags_v;
 }
 
-inline Media ParseMediaFromJSON(nlohmann::json data) {
-  Media media{};
+inline std::vector<Media> ParseMediaFromJSON(nlohmann::json data) {
+  std::vector<Media> media_v{};
 
-  if (!data.is_null(), data.is_object()) {
-    media.id                 = data["id"];
-    media.type               = data["type"];
-    media.url                = data["url"];
-    media.preview_url        = data["preview_url"];
-    media.remote_url         = data["remote_url"];
-    media.preview_remote_url = data["preview_remote_url"];
-    media.text_url           = data["text_url"];
-    media.description        = data["description"];
-    media.blurhash           = data["blurhash"];
-    media.meta               = MediaMetadata{};
+  if (!data.is_null(), data.is_array()) {
+    for (const auto& item : data) {
+      Media media{};
 
-    if (data["media"].contains("original")) {
-      auto original = data["media"]["original"];
+      media.id                 = GetJSONStringValue(item, "id");
+      media.type               = GetJSONStringValue(item, "type");
+      media.url                = GetJSONStringValue(item, "url");
+      media.preview_url        = GetJSONStringValue(item, "preview_url");
+      media.remote_url         = GetJSONStringValue(item, "remote_url");
+      media.preview_remote_url = GetJSONStringValue(item, "preview_remote_url");
+      media.text_url           = GetJSONStringValue(item, "text_url");
+      media.description        = GetJSONStringValue(item, "description");
+      media.blurhash           = GetJSONStringValue(item, "blurhash");
+      media.meta               = MediaMetadata{};
 
-      media.meta.original = MetaDetails{
-        .width    = original["width"],
-        .height   = original["height"],
-        .size     = original["size"],
-        .aspect   = original["aspect"]
-      };
+      if (item["meta"].contains("original")) {
+        auto original = item["meta"]["original"];
+
+        media.meta.original = MetaDetails{
+          .width    = original["width"],
+          .height   = original["height"],
+          .size     = original["size"],
+          .aspect   = original["aspect"]
+        };
+      }
+
+      if (item["meta"].contains("small")) {
+        auto small = item["meta"]["small"];
+
+        media.meta.small = MetaDetails{
+          .width    = small["width"],
+          .height   = small["height"],
+          .size     = small["size"],
+          .aspect   = small["aspect"]
+        };
+      }
+
+      media_v.emplace_back(std::move(media));
     }
 
-    if (data["media"].contains("small")) {
-      auto small = data["media"]["small"];
-
-      media.meta.small = MetaDetails{
-        .width    = small["width"],
-        .height   = small["height"],
-        .size     = small["size"],
-        .aspect   = small["aspect"]
-      };
-    }
   }
 
-  return media;
+  return media_v;
 }
 
-inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
-  if (!data.is_null() && data.contains(key) && !data[key].is_null())
-    return data[key].get<std::string>();
-  return "";
-}
-
-inline bool GetJSONBoolValue(nlohmann::json data, std::string key) {
-  if (!data.is_null() && data.contains(key) && !data[key].is_null())
-    return data[key].get<bool>();
-  return "";
-}
 
 /**
  * @brief
