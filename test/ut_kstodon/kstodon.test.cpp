@@ -51,7 +51,4 @@ TEST(KStodonTests, FetchStatus) {
   Status status = client.FetchStatus(TEST_ID);
 
   EXPECT_TRUE(status.id == TEST_ID);
-
-
-
 }

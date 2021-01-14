@@ -15,23 +15,25 @@ bool Client::HasAuth() {
   return m_authenticator.IsAuthenticated();
 }
 
+
 Status Client::FetchStatus(uint64_t id) {
   using json = nlohmann::json;
   using namespace constants::MastodonOnline;
 
-  Status status{};
-
   const std::string STATUSES_URL = BASE_URL + PATH.at(STATUSES_INDEX) + "/" + std::to_string(id);
-  std::string       response;
 
   cpr::Response r = cpr::Get(
     cpr::Url{STATUSES_URL}
   );
 
-  log(r.text);
+  if (!r.text.empty()) {
+    return JSONToStatus(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
+  }
 
-  return status;
+  return Status{};
 }
+
+
 
 } // namespace kstodon
 

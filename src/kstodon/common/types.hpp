@@ -5,136 +5,312 @@
 #include <string>
 #include <unordered_map>
 
+#include <nlohmann/json.hpp>
+
+#include "util.hpp"
+
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░░ STRUCTS ░░░░░░░░░░░░░░░░░░░░░░░│
   └───────────────────────────────────────────────────────────┘
 */
 
-struct FollowerCount {
+struct AccountField {
 std::string name;
-std::string platform;
 std::string value;
-std::string time;
-std::string delta_t;
-std::string delta_v;
 };
 
-struct GoogleTrend {
-std::string term;
-int         value;
-};
+struct Account {
+std::string               id;
+std::string               username;
+std::string               acct;
+std::string               display_name;
+std::string               locked;
+std::string               bot;
+std::string               discoverable;
+std::string               group;
+std::string               created_at;
+std::string               note;
+std::string               url;
+std::string               avatar;
+std::string               header;
+std::string               header_static;
+uint32_t                  followers_count;
+uint32_t                  following_count;
+uint32_t                  statuses_count;
+std::string               last_status_at;
+std::vector<AccountField> fields;
 
-struct TermInfo {
-  std::string term;
-  int         value;
-};
+friend std::ostream &operator<<(std::ostream& o, const Account& a) {
+  std::string fields{};
+  for (const auto& field : a.fields) fields += "\nName: " + field.name + "\nValue: " + field.value;
 
+  o << "ID:           " << a.id              << "\n" <<
+       "Username:     " << a.username        << "\n" <<
+       "Account:      " << a.acct            << "\n" <<
+       "Display Name: " << a.display_name    << "\n" <<
+       "Locked:       " << a.locked          << "\n" <<
+       "Bot:          " << a.bot             << "\n" <<
+       "Discoverable: " << a.discoverable    << "\n" <<
+       "Group:        " << a.group           << "\n" <<
+       "Created:      " << a.created_at      << "\n" <<
+       "Note:         " << a.note            << "\n" <<
+       "URL:          " << a.url             << "\n" <<
+       "Avatar:       " << a.avatar          << "\n" <<
+       "Header:       " << a.header          << "\n" <<
+       "Followers:    " << a.followers_count << "\n" <<
+       "Following:    " << a.following_count << "\n" <<
+       "Statuses:     " << a.statuses_count  << "\n" <<
+       "Last Status:  " << a.last_status_at  << "\n" <<
 
-struct VideoStats {
-std::string              views;
-std::string              likes;
-std::string              dislikes;
-std::string              comments;
-std::vector<std::string> keywords;
-double                   view_score;
-double                   like_score;
-double                   dislike_score;
-double                   comment_score;
-std::vector<GoogleTrend> trends;
-double                   keyword_score;
-};
+       "FIELDS\n"       << fields;
 
-/**
- * VideoInfo struct
- *
- * TODO: consider wrapping as a class with an ID
- */
-struct VideoInfo {
-std::string              channel_id;
-std::string              id;
-std::string              title;
-std::string              description;
-std::string              datetime;
-std::string              time;
-std::string              url;
-VideoStats               stats;
-
-/**
- * get_primary_keywords
- *
- * @returns [out] {std::vector<std::string>} up to 3 keywords
- */
-std::vector<std::string> get_primary_keywords() {
-  return std::vector<std::string>{
-    stats.keywords.cbegin(),
-    stats.keywords.size() > 2 ?
-      stats.keywords.cbegin() + 3 :
-      stats.keywords.cbegin() + stats.keywords.size()
-    };
+  return o;
 }
+};
 
-friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
-  o << "Channel ID:  " << v.channel_id     << "\n" <<
-       "Video ID:    " << v.id             << "\n" <<
-       "Title:       " << v.title          << "\n" <<
-       "Description: " << v.description    << "\n" <<
-       "Datetime:    " << v.datetime       << "\n" <<
-       "URL:         " << v.url            << "\n" <<
+inline Account ParseAccountFromJSON(nlohmann::json data) {
+  Account account{};
+  account.id              = SanitizeJSON(data["id"].dump());
+  account.username        = SanitizeJSON(data["username"].dump());
+  account.acct            = SanitizeJSON(data["acct"].dump());
+  account.display_name    = SanitizeJSON(data["display_name"].dump());
+  account.locked          = SanitizeJSON(data["locked"].dump());
+  account.bot             = SanitizeJSON(data["bot"].dump());
+  account.discoverable    = SanitizeJSON(data["discoverable"].dump());
+  account.group           = SanitizeJSON(data["group"].dump());
+  account.created_at      = SanitizeJSON(data["created_at"].dump());
+  account.note            = SanitizeJSON(data["note"].dump());
+  account.url             = SanitizeJSON(data["url"].dump());
+  account.avatar          = SanitizeJSON(data["avatar"].dump());
+  account.header          = SanitizeJSON(data["header"].dump());
+  account.followers_count = std::stoi(SanitizeJSON(data["followers_count"].dump()));
+  account.following_count = std::stoi(SanitizeJSON(data["following_count"].dump()));
+  account.statuses_count  = std::stoi(SanitizeJSON(data["statuses_count"].dump()));
+  account.last_status_at = SanitizeJSON(data["last_status_at"].dump());
 
-       "STATISTICS\n" <<
+  nlohmann::json fields = data["source"]["fields"];
 
-       "➝ Views:         " << v.stats.views      << "\n" <<
-       "➝ Likes:         " << v.stats.likes      << "\n" <<
-       "➝ Dislikes:      " << v.stats.dislikes   << "\n" <<
-       "➝ Comments:      " << v.stats.comments   << "\n" <<
-       "➝ View Score:    " << v.stats.view_score << "\n" <<
-       "➝ Like Score:    " << v.stats.like_score << "\n" <<
-       "➝ Dislike Score: " << v.stats.dislike_score << "\n" <<
-       "➝ Comment Score: " << v.stats.comment_score << "\n";
-
-  if (!v.stats.trends.empty()) {
-    o << "KEYWORDS\n";
-    for (const auto& trend : v.stats.trends)
-      o << "➤ Term:  " << trend.term  << "\n" <<
-           "  Value: " << trend.value << "\n";
+  for (const auto& field : fields) {
+    account.fields.emplace_back(AccountField{
+      .name  = SanitizeJSON(field["name"].dump()),
+      .value = SanitizeJSON(field["value"].dump())
+    });
   }
 
-  return o;
+  return account;
 }
-}; // struct VideoInfo
 
-struct ChannelStats {
-std::string views;
-std::string subscribers;
-std::string videos;
-};
+struct Credentials {
+std::string id;
+std::string name;
+std::string website;
+std::string redirect_uri;
+std::string scope;
+std::string client_id;
+std::string client_secret;
+std::string vapid_key;
+std::string code;
 
-struct ChannelInfo {
-std::string            name;
-std::string            description;
-std::string            created;
-std::string            thumb_url;
-ChannelStats           stats;
-std::string            id;
-std::vector<VideoInfo> videos;
-
-friend std::ostream &operator<<(std::ostream& o, const ChannelInfo& c) {
-  o << "ID:          " << c.id     << "\n" <<
-       "Name:        " << c.name             << "\n" <<
-       "Description: " << c.description          << "\n" <<
-       "Created:     " << c.created    << "\n" <<
-       "Thumbnail:   " << c.thumb_url       << "\n" <<
-
-       "STATISTICS\n" <<
-
-       "➝ Views:       " << c.stats.views      << "\n" <<
-       "➝ Subscribers: " << c.stats.subscribers      << "\n" <<
-       "➝ Videos:      " << c.stats.videos   << "\n";
-
-  return o;
+bool is_valid() {
+  return
+    !id.empty() &&
+    !name.empty() &&
+    !website.empty() &&
+    !redirect_uri.empty() &&
+    !scope.empty() &&
+    !client_id.empty() &&
+    !client_secret.empty() &&
+    !vapid_key.empty() &&
+    !code.empty();
 }
 };
 
+struct Auth {
+std::string access_token;
+std::string token_type;
+std::string scope;
+std::string created_at;
 
+bool is_valid() {
+  return (
+    !access_token.empty() &&
+    !token_type.empty()   &&
+    !scope.empty()        &&
+    !created_at.empty()
+  );
+}
+};
+
+struct Application {
+std::string name;
+std::string url;
+};
+
+struct MetaDetails {
+uint32_t    width;
+uint32_t    height;
+std::string size;
+float       aspect;
+};
+struct MediaMetadata {
+MetaDetails original;
+MetaDetails small;
+};
+
+struct Tag {
+std::string name;
+std::string url;
+};
+
+struct Card {};
+struct Poll {};
+struct Media {
+std::string id;
+std::string type;
+std::string url;
+std::string preview_url;
+std::string remote_url;
+std::string preview_remote_url;
+std::string text_url;
+MediaMetadata meta;
+std::string description;
+std::string blurhash;
+
+bool has_media() { return !id.empty(); }
+};
+
+struct Status{
+uint64_t                 id;
+std::string              created_at;
+std::string              replying_to_id;
+std::string              replying_to_account;
+bool                     sensitive;
+std::string              spoiler;
+std::string              visibility;
+std::string              language;
+std::string              uri;
+std::string              url;
+std::string              replies;
+std::string              reblogs;
+std::string              favourites;
+std::string              content;
+std::string              reblog;
+Application              application;
+Account                  account;
+Media                    media;
+std::vector<std::string> mentions;
+std::vector<Tag>        tags;
+std::vector<std::string> emojis;
+Card                     card;
+Poll                     poll;
+};
+
+
+inline std::vector<Tag> ParseTagsFromJSON(nlohmann::json data) {
+  std::vector<Tag> tags_v{};
+
+  for (const auto& tag : data) {
+    tags_v.emplace_back(Tag{
+      .name = tag["name"],
+      .url = tag["url"]
+    });
+  }
+
+  return tags_v;
+}
+
+inline Media ParseMediaFromJSON(nlohmann::json data) {
+  Media media{};
+
+  if (!data.is_null(), data.is_object()) {
+    media.id                 = data["id"];
+    media.type               = data["type"];
+    media.url                = data["url"];
+    media.preview_url        = data["preview_url"];
+    media.remote_url         = data["remote_url"];
+    media.preview_remote_url = data["preview_remote_url"];
+    media.text_url           = data["text_url"];
+    media.description        = data["description"];
+    media.blurhash           = data["blurhash"];
+    media.meta               = MediaMetadata{};
+
+    if (data["media"].contains("original")) {
+      auto original = data["media"]["original"];
+
+      media.meta.original = MetaDetails{
+        .width    = original["width"],
+        .height   = original["height"],
+        .size     = original["size"],
+        .aspect   = original["aspect"]
+      };
+    }
+
+    if (data["media"].contains("small")) {
+      auto small = data["media"]["small"];
+
+      media.meta.small = MetaDetails{
+        .width    = small["width"],
+        .height   = small["height"],
+        .size     = small["size"],
+        .aspect   = small["aspect"]
+      };
+    }
+  }
+
+  return media;
+}
+
+inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
+  if (!data.is_null() && data.contains(key) && !data[key].is_null())
+    return data[key].get<std::string>();
+  return "";
+}
+
+inline bool GetJSONBoolValue(nlohmann::json data, std::string key) {
+  if (!data.is_null() && data.contains(key) && !data[key].is_null())
+    return data[key].get<bool>();
+  return "";
+}
+
+/**
+ * @brief
+ *
+ * @param data
+ * @return Status
+ */
+inline Status JSONToStatus(nlohmann::json data) {
+  Status status{};
+
+  auto is_object = data.is_object();
+  auto is_array = data.is_array();
+  auto is_null = data.is_null();
+
+  if (!data.is_null() && data.is_object()) {
+    status.id                  = std::stoul(data["id"].get<std::string>());
+    status.created_at          = GetJSONStringValue(data, "created_at");
+    status.replying_to_id      = GetJSONStringValue(data, "in_reply_to");
+    status.replying_to_account = GetJSONStringValue(data, "in_reply_to_account_id");
+    status.sensitive           = GetJSONBoolValue(data, "sensitive");
+    status.spoiler             = GetJSONStringValue(data, "spoiler");
+    status.visibility          = GetJSONStringValue(data, "visibility");
+    status.language            = GetJSONStringValue(data, "language");
+    status.uri                 = GetJSONStringValue(data, "uri");
+    status.url                 = GetJSONStringValue(data, "url");
+    status.replies             = GetJSONStringValue(data, "replies");
+    status.reblogs             = GetJSONStringValue(data, "reblogs");
+    status.favourites          = GetJSONStringValue(data, "favourites");
+    status.content             = GetJSONStringValue(data, "content");
+    status.reblog              = GetJSONStringValue(data, "reblog");
+    status.application.name    = GetJSONStringValue(data["application"], "name");
+    status.application.url     = GetJSONStringValue(data["application"], "website");
+    status.account             = ParseAccountFromJSON(data["account"]);
+    status.media               = ParseMediaFromJSON(data["media_attachments"]);
+    status.mentions            = data["mentions"].get<std::vector<std::string>>();
+    status.tags                = ParseTagsFromJSON(data["tags"]);
+    status.emojis              = data["emojis"].get<std::vector<std::string>>();
+  }
+
+  return status;
+}
 #endif // __TYPES_HPP__
