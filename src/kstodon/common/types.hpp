@@ -288,26 +288,26 @@ inline Status JSONToStatus(nlohmann::json data) {
 
   if (!data.is_null() && data.is_object()) {
     status.id                  = std::stoul(data["id"].get<std::string>());
-    status.created_at          = GetJSONStringValue(data, "created_at");
-    status.replying_to_id      = GetJSONStringValue(data, "in_reply_to");
-    status.replying_to_account = GetJSONStringValue(data, "in_reply_to_account_id");
-    status.sensitive           = GetJSONBoolValue(data, "sensitive");
-    status.spoiler             = GetJSONStringValue(data, "spoiler");
-    status.visibility          = GetJSONStringValue(data, "visibility");
-    status.language            = GetJSONStringValue(data, "language");
-    status.uri                 = GetJSONStringValue(data, "uri");
-    status.url                 = GetJSONStringValue(data, "url");
-    status.replies             = GetJSONStringValue(data, "replies");
-    status.reblogs             = GetJSONStringValue(data, "reblogs");
-    status.favourites          = GetJSONStringValue(data, "favourites");
-    status.content             = GetJSONStringValue(data, "content");
-    status.reblog              = GetJSONStringValue(data, "reblog");
-    status.application.name    = GetJSONStringValue(data["application"], "name");
-    status.application.url     = GetJSONStringValue(data["application"], "website");
+    status.created_at          = GetJSONStringValue  (data, "created_at");
+    status.replying_to_id      = GetJSONStringValue  (data, "in_reply_to");
+    status.replying_to_account = GetJSONStringValue  (data, "in_reply_to_account_id");
+    status.sensitive           = GetJSONBoolValue    (data, "sensitive");
+    status.spoiler             = GetJSONStringValue  (data, "spoiler");
+    status.visibility          = GetJSONStringValue  (data, "visibility");
+    status.language            = GetJSONStringValue  (data, "language");
+    status.uri                 = GetJSONStringValue  (data, "uri");
+    status.url                 = GetJSONStringValue  (data, "url");
+    status.replies             = GetJSONStringValue  (data, "replies");
+    status.reblogs             = GetJSONStringValue  (data, "reblogs");
+    status.favourites          = GetJSONStringValue  (data, "favourites");
+    status.content             = GetJSONStringValue  (data, "content");
+    status.reblog              = GetJSONStringValue  (data, "reblog");
+    status.application.name    = GetJSONStringValue  (data["application"], "name");
+    status.application.url     = GetJSONStringValue  (data["application"], "website");
     status.account             = ParseAccountFromJSON(data["account"]);
-    status.media               = ParseMediaFromJSON(data["media_attachments"]);
+    status.media               = ParseMediaFromJSON  (data["media_attachments"]);
     status.mentions            = data["mentions"].get<std::vector<std::string>>();
-    status.tags                = ParseTagsFromJSON(data["tags"]);
+    status.tags                = ParseTagsFromJSON   (data["tags"]);
     status.emojis              = data["emojis"].get<std::vector<std::string>>();
   }
 
