@@ -64,7 +64,7 @@ bool Client::PostStatus(Status status) {
     cpr::Body{status.postdata()}
   );
 
-  return (r.status_code < 400)
+  return (r.status_code < 400);
 }
 
 } // namespace kstodon
