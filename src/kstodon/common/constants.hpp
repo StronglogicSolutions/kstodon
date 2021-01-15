@@ -19,13 +19,15 @@ namespace MastodonOnline {
 const uint8_t TOKEN_INDEX        = 0x00;
 const uint8_t TOKEN_VERIFY_INDEX = 0x01;
 const uint8_t STATUSES_INDEX     = 0x02;
+const uint8_t ACCOUNTS_INDEX     = 0x03;
 
 const std::string BASE_URL{"https://mastodon.online"};
 
 const std::vector<std::string> PATH{
   "/oauth/token",
   "/api/v1/accounts/verify_credentials",
-  "/api/v1/statuses"
+  "/api/v1/statuses",
+  "/api/v1/accounts"
 };
 } // namespace MastodonOnline
 } // namespace constants

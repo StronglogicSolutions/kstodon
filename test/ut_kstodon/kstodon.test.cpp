@@ -41,7 +41,7 @@ TEST(KStodonTests, ClientHasAuth) {
   EXPECT_TRUE(client_has_auth);
 }
 
-TEST(KStodonTests, FetchStatus) {
+TEST(KStodonTests, DISABLED_FetchStatus) {
   using namespace kstodon;
 
   // uint64_t TEST_ID{105528916039043648};
@@ -52,4 +52,19 @@ TEST(KStodonTests, FetchStatus) {
   Status status = client.FetchStatus(TEST_ID);
 
   EXPECT_TRUE(status.id == TEST_ID);
+}
+
+TEST(KStodonTests, FetchUserStatuses) {
+  using namespace kstodon;
+
+  Client::UserID user_id{"154950"};
+  Client         client{};
+
+  std::vector<Status> statuses = client.FetchUserStatuses(user_id);
+
+  for (const auto& status : statuses) {
+    std::cout << status << std::endl;
+  }
+
+  EXPECT_FALSE(statuses.empty());
 }

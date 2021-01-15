@@ -26,8 +26,6 @@ Status Client::FetchStatus(uint64_t id) {
     cpr::Url{STATUSES_URL}
   );
 
-  log(r.text);
-
   if (!r.text.empty()) {
     return JSONToStatus(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
   }
@@ -35,6 +33,23 @@ Status Client::FetchStatus(uint64_t id) {
   return Status{};
 }
 
+std::vector<Status> Client::FetchUserStatuses(UserID id) {
+  using json = nlohmann::json;
+  using namespace constants::MastodonOnline;
+  // api/v1/accounts/:id/statuses
+  const std::string URL = BASE_URL + PATH.at(ACCOUNTS_INDEX) + '/' + id + "/statuses";
+
+  cpr::Response r = cpr::Get(
+    cpr::Url{URL}
+  );
+
+  if (!r.text.empty()) {
+    return JSONToStatuses(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
+  }
+
+  return std::vector<Status>{};
+
+}
 
 
 } // namespace kstodon

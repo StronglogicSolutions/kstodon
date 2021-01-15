@@ -26,8 +26,12 @@ virtual bool HasAuth() = 0;
 
 class MastodonStatusClient {
 public:
+using UserID   = std::string;
+using StatusID = uint64_t;
+
 virtual ~MastodonStatusClient() {}
-virtual Status FetchStatus(uint64_t id) = 0;
+virtual Status              FetchStatus(StatusID id) = 0;
+virtual std::vector<Status> FetchUserStatuses(UserID id) = 0;
 };
 
 /**
@@ -45,7 +49,8 @@ Client();
 virtual ~Client() override {}
 
 virtual bool HasAuth() override;
-virtual Status FetchStatus(uint64_t id) override;
+virtual Status FetchStatus(StatusID id) override;
+virtual std::vector<Status> FetchUserStatuses(UserID id) override;
 
 private:
 Authenticator m_authenticator;
