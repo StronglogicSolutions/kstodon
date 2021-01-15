@@ -61,15 +61,10 @@ bool Client::PostStatus(Status status) {
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
     },
-    cpr::Body{std::string{
-      "status=" + status.content + "&" +
-      "spoiler_text=" + "Test!" + "&"
-    }}
+    cpr::Body{status.postdata()}
   );
 
-  if (r.status_code < 400)
-    return true;
-  return false;
+  return (r.status_code < 400)
 }
 
 } // namespace kstodon

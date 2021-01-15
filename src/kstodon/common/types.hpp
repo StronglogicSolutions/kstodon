@@ -250,7 +250,7 @@ uint64_t                 id;
 std::string              created_at;
 std::string              replying_to_id;
 std::string              replying_to_account;
-bool                     sensitive;
+bool                     sensitive            = false;
 std::string              spoiler;
 std::string              visibility;
 std::string              language;
@@ -305,6 +305,21 @@ friend std::ostream &operator<<(std::ostream& o, const Status& s) {
       o << "Card:" << "TODO" << "\n" <<
            "Poll:" << "TODO" << "\n";
   return o;
+}
+
+std::string postdata() {
+  return (replying_to_id.empty()) ?
+  std::string{
+    "status="       + content + "&" +
+    "spoiler_text=" + spoiler + "&" +
+    "sensitive="    + std::to_string(sensitive)
+  } :
+  std::string{
+    "status="       + content + "&" +
+    "spoiler_text=" + spoiler + "&" +
+    "sensitive="    + std::to_string(sensitive) + "&" +
+    "in_reply_to="  + replying_to_id
+  };
 }
 };
 
