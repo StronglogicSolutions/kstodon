@@ -32,6 +32,7 @@ using StatusID = uint64_t;
 virtual ~MastodonStatusClient() {}
 virtual Status              FetchStatus(StatusID id) = 0;
 virtual std::vector<Status> FetchUserStatuses(UserID id) = 0;
+virtual bool                PostStatus(Status status) = 0;
 };
 
 /**
@@ -51,8 +52,10 @@ virtual ~Client() override {}
 virtual bool HasAuth() override;
 virtual Status FetchStatus(StatusID id) override;
 virtual std::vector<Status> FetchUserStatuses(UserID id) override;
+virtual bool PostStatus(Status status) override;
 
 private:
+using json = nlohmann::json;
 Authenticator m_authenticator;
 };
 

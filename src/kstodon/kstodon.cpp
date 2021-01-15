@@ -1,6 +1,8 @@
 #include "kstodon.hpp"
 
 namespace kstodon {
+using namespace constants::MastodonOnline;
+
 Client::Client()
 : m_authenticator(Authenticator{}) {
   if (!m_authenticator.HasValidToken()) {
@@ -18,7 +20,6 @@ bool Client::HasAuth() {
 
 Status Client::FetchStatus(uint64_t id) {
   using json = nlohmann::json;
-  using namespace constants::MastodonOnline;
 
   const std::string STATUSES_URL = BASE_URL + PATH.at(STATUSES_INDEX) + "/" + std::to_string(id);
 
@@ -35,7 +36,6 @@ Status Client::FetchStatus(uint64_t id) {
 
 std::vector<Status> Client::FetchUserStatuses(UserID id) {
   using json = nlohmann::json;
-  using namespace constants::MastodonOnline;
   // api/v1/accounts/:id/statuses
   const std::string URL = BASE_URL + PATH.at(ACCOUNTS_INDEX) + '/' + id + "/statuses";
 
@@ -51,6 +51,26 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 
 }
 
+bool Client::PostStatus(Status status) {
+  using namespace constants;
+
+  const std::string URL = BASE_URL + PATH.at(STATUSES_INDEX);
+
+  cpr::Response r = cpr::Post(
+    cpr::Url{URL},
+    cpr::Header{
+      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
+    },
+    cpr::Body{std::string{
+      "status=" + status.content + "&" +
+      "spoiler_text=" + "Test!" + "&"
+    }}
+  );
+
+  if (r.status_code < 400)
+    return true;
+  return false;
+}
 
 } // namespace kstodon
 

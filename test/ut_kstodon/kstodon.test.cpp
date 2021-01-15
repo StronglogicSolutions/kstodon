@@ -54,7 +54,7 @@ TEST(KStodonTests, DISABLED_FetchStatus) {
   EXPECT_TRUE(status.id == TEST_ID);
 }
 
-TEST(KStodonTests, FetchUserStatuses) {
+TEST(KStodonTests, DISABLED_FetchUserStatuses) {
   using namespace kstodon;
 
   Client::UserID user_id{"154950"};
@@ -67,4 +67,20 @@ TEST(KStodonTests, FetchUserStatuses) {
   }
 
   EXPECT_FALSE(statuses.empty());
+}
+
+TEST(KStodonTests, PostStatus) {
+  using namespace kstodon;
+
+  Client client{};
+  Status status{};
+
+  status.content = "Test content from KStodon!";
+
+  bool has_auth = client.HasAuth();
+
+  bool result   = client.PostStatus(status);
+
+  EXPECT_TRUE(result);
+
 }
