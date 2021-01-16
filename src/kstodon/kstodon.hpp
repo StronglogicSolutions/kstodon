@@ -35,6 +35,12 @@ virtual std::vector<Status> FetchUserStatuses(UserID id) = 0;
 virtual bool                PostStatus(Status status) = 0;
 };
 
+class MastodonMediaClient {
+public:
+virtual ~MastodonMediaClient() {}
+virtual Media PostMedia(File file) = 0;
+};
+
 /**
   @class
   ┌───────────────────────────────────────────────────────────┐
@@ -43,16 +49,18 @@ virtual bool                PostStatus(Status status) = 0;
 */
 
 class Client : public SecureClient,
-               public MastodonStatusClient {
+               public MastodonStatusClient,
+               public MastodonMediaClient {
 public:
 Client();
 
 virtual ~Client() override {}
 
-virtual bool HasAuth() override;
-virtual Status FetchStatus(StatusID id) override;
+virtual bool                HasAuth() override;
+virtual Status              FetchStatus(StatusID id) override;
 virtual std::vector<Status> FetchUserStatuses(UserID id) override;
-virtual bool PostStatus(Status status) override;
+virtual bool                PostStatus(Status status) override;
+virtual Media               PostMedia(File file) override;
 
 private:
 using json = nlohmann::json;

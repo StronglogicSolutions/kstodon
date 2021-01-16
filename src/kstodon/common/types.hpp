@@ -5,10 +5,52 @@
 #include <string>
 #include <unordered_map>
 
+#include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 
 #include "util.hpp"
 
+class PostDataInterface {
+public:
+virtual ~PostDataInterface() {}
+virtual std::string postdata() = 0;
+};
+
+
+struct File : public PostDataInterface {
+std::string path;
+std::string description;
+std::string thumbnail;
+
+std::string GetBytes() {
+  return ReadFromFile(path);
+}
+
+virtual ~File() override {}
+/**
+ * @brief
+ *
+ * TODO: Add thumbnail support
+ *
+ * @return std::string
+ */
+virtual std::string postdata() {
+  std::string payload = GetBytes();
+  return std::string{
+    "file="         + payload + "&" +
+    "description="  + description
+  };
+}
+
+cpr::Multipart multiformdata() {
+  std::string bytes = GetBytes();
+  return cpr::Multipart{
+    {"description", description},
+    {"file", cpr::File{path}}
+  };
+}
+
+};
 inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
   if (!data.is_null() && data.contains(key) && !data[key].is_null())
     return data[key].get<std::string>();
@@ -242,10 +284,9 @@ friend std::ostream &operator<<(std::ostream& o, const Media& m) {
 o << "ID: " << m.id << "\nURL: " << m.url << "\n(TODO: Complete media ostream)" << std::endl;
 return o;
 }
-
 };
 
-struct Status{
+struct Status : public PostDataInterface {
 uint64_t                 id;
 std::string              created_at;
 std::string              replying_to_id;
@@ -307,7 +348,7 @@ friend std::ostream &operator<<(std::ostream& o, const Status& s) {
   return o;
 }
 
-std::string postdata() {
+virtual std::string postdata() override {
   return (replying_to_id.empty()) ?
   std::string{
     "status="       + content + "&" +
@@ -321,6 +362,8 @@ std::string postdata() {
     "in_reply_to="  + replying_to_id
   };
 }
+
+virtual ~Status() override {}
 };
 
 

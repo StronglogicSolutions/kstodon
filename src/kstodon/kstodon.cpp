@@ -67,5 +67,31 @@ bool Client::PostStatus(Status status) {
   return (r.status_code < 400);
 }
 
+Media Client::PostMedia(File file) {
+  using namespace constants;
+
+  const std::string URL{BASE_URL + PATH.at(MEDIA_INDEX)};
+
+  cpr::Response r = cpr::Post(
+    cpr::Url{URL},
+    cpr::Header{
+      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
+    },
+    file.multiformdata()
+  );
+
+  std::cout << r.text << std::endl;
+
+  if (r.status_code < 400) {
+    auto media_v = ParseMediaFromJSON(r.text);
+
+    if (!media_v.empty()) {
+      return media_v.front();
+    }
+  }
+
+  return Media{};
+}
+
 } // namespace kstodon
 

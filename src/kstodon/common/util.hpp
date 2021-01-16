@@ -29,6 +29,18 @@ inline std::string ReadFromFile(std::string path) {
 }
 
 /**
+ * ReadBytesFromFile
+ *
+ * @param path
+ * @return std::vector<uint8_t>
+ */
+inline std::vector<uint8_t> ReadBytesFromFile(std::string path) {
+  std::string file = ReadFromFile(path);
+
+  return std::vector<uint8_t>{file.begin(), file.end()};
+}
+
+/**
  * Poor man's log
  *
  * @param

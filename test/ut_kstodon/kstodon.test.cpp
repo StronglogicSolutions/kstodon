@@ -69,7 +69,7 @@ TEST(KStodonTests, DISABLED_FetchUserStatuses) {
   EXPECT_FALSE(statuses.empty());
 }
 
-TEST(KStodonTests, PostStatus) {
+TEST(KStodonTests, DISABLED_PostStatus) {
   using namespace kstodon;
 
   Client client{};
@@ -82,5 +82,22 @@ TEST(KStodonTests, PostStatus) {
   bool result   = client.PostStatus(status);
 
   EXPECT_TRUE(result);
+}
 
+TEST(KstodonTests, PostMedia) {
+  using namespace kstodon;
+  const std::string TEST_PATH{get_executable_cwd() + "../test/ut_kstodon/data/test_file.jpg"};
+
+  Client client{};
+  File   file{};
+
+  file.path        = TEST_PATH;
+  file.description = "This is a test file!";
+
+  bool path_is_valid     = file.GetBytes().size() > 0;
+  bool is_media_client   = (dynamic_cast<MastodonMediaClient*>(&client) != nullptr);
+  bool media_post_result = client.PostMedia(file);
+
+  EXPECT_TRUE(is_media_client);
+  EXPECT_TRUE(media_post_result);
 }
