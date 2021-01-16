@@ -83,15 +83,17 @@ Media Client::PostMedia(File file) {
   std::cout << r.text << std::endl;
 
   if (r.status_code < 400) {
-    auto media_v = ParseMediaFromJSON(r.text);
-
-    if (!media_v.empty()) {
-      return media_v.front();
-    }
+    return ParseMediaFromJSON(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
   }
 
   return Media{};
 }
 
+bool Client::PostStatus(Status status, std::vector<File> files) {
+  for (const auto& file : files) {
+    Media media = PostMedia(file);
+    status.media.emplace_back(std::move(media));
+  }
+  return PostStatus(status);
+}
 } // namespace kstodon
-

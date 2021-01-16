@@ -84,20 +84,41 @@ TEST(KStodonTests, DISABLED_PostStatus) {
   EXPECT_TRUE(result);
 }
 
-TEST(KstodonTests, PostMedia) {
+TEST(KStodonTests, DISABLED_PostMedia) {
   using namespace kstodon;
-  const std::string TEST_PATH{get_executable_cwd() + "../test/ut_kstodon/data/test_file.jpg"};
 
   Client client{};
-  File   file{};
+  File   file{TEST_PATH};
 
-  file.path        = TEST_PATH;
   file.description = "This is a test file!";
 
-  bool path_is_valid     = file.GetBytes().size() > 0;
-  bool is_media_client   = (dynamic_cast<MastodonMediaClient*>(&client) != nullptr);
-  bool media_post_result = client.PostMedia(file);
+  bool  path_is_valid     = file.GetBytes().size() > 0;
+  bool  is_media_client   = (dynamic_cast<MastodonMediaClient*>(&client) != nullptr);
+  Media media             = client.PostMedia(file);
+  bool media_post_result  = !media.id.empty();
+  Status status{};
+
+  status.content = "This is a test!";
+  status.media.emplace_back(std::move(media));
+
+  bool status_post_result = client.PostStatus(status);
 
   EXPECT_TRUE(is_media_client);
   EXPECT_TRUE(media_post_result);
+  EXPECT_TRUE(status_post_result);
+}
+
+TEST(KStodonTests, PostStatusWithFile) {
+  using namespace kstodon;
+
+  Status status{};
+  status.content = "This is another test, yo!";
+
+  bool result = Client{}.PostStatus(
+    status, std::vector<File>{
+      File{TEST_PATH}
+    }
+  );
+
+  EXPECT_TRUE(result);
 }

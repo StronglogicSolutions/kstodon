@@ -39,6 +39,7 @@ class MastodonMediaClient {
 public:
 virtual ~MastodonMediaClient() {}
 virtual Media PostMedia(File file) = 0;
+virtual bool  PostStatus(Status status, std::vector<File> media) = 0;
 };
 
 /**
@@ -60,6 +61,7 @@ virtual bool                HasAuth() override;
 virtual Status              FetchStatus(StatusID id) override;
 virtual std::vector<Status> FetchUserStatuses(UserID id) override;
 virtual bool                PostStatus(Status status) override;
+virtual bool                PostStatus(Status status, std::vector<File> media) override;
 virtual Media               PostMedia(File file) override;
 
 private:

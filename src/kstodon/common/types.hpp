@@ -26,6 +26,8 @@ std::string GetBytes() {
   return ReadFromFile(path);
 }
 
+File(std::string file_path) : path(file_path) {}
+
 virtual ~File() override {}
 /**
  * @brief
@@ -349,15 +351,25 @@ friend std::ostream &operator<<(std::ostream& o, const Status& s) {
 }
 
 virtual std::string postdata() override {
+  std::string media_ids{};
+  std::string delim{""};
+
+  for (const auto& media_item : media) {
+    media_ids += media_item.id;
+    delim = ",";
+  }
+
   return (replying_to_id.empty()) ?
   std::string{
-    "status="       + content + "&" +
-    "spoiler_text=" + spoiler + "&" +
+    "status="       + content   + "&" +
+    "media_ids[]="  + media_ids + "&" +
+    "spoiler_text=" + spoiler   + "&" +
     "sensitive="    + std::to_string(sensitive)
   } :
   std::string{
-    "status="       + content + "&" +
-    "spoiler_text=" + spoiler + "&" +
+    "status="       + content   + "&" +
+    "media_ids[]="    + media_ids + "&" +
+    "spoiler_text=" + spoiler   + "&" +
     "sensitive="    + std::to_string(sensitive) + "&" +
     "in_reply_to="  + replying_to_id
   };
@@ -374,7 +386,7 @@ inline std::vector<Tag> ParseTagsFromJSON(nlohmann::json data) {
     for (const auto& tag : data) {
       tags_v.emplace_back(Tag{
         .name = tag["name"],
-        .url = tag["url"]
+        .url  = tag["url"]
       });
     }
   }
@@ -388,9 +400,9 @@ inline std::vector<Mention> ParseMentionsFromJSON(nlohmann::json data) {
   if (!data.is_null()) {
     for (const auto& mention : data) {
       mentions.emplace_back(Mention{
-        .acct = mention["acct"],
-        .id = mention["id"],
-        .url = mention["url"],
+        .acct     = mention["acct"],
+        .id       = mention["id"],
+        .url      = mention["url"],
         .username = mention["username"]
       });
     }
@@ -399,50 +411,54 @@ inline std::vector<Mention> ParseMentionsFromJSON(nlohmann::json data) {
   return mentions;
 }
 
+inline Media ParseMediaFromJSON(nlohmann::json data) {
+  Media media{};
 
-inline std::vector<Media> ParseMediaFromJSON(nlohmann::json data) {
-  std::vector<Media> media_v{};
+  if (!data.is_null() && data.is_object()) {
+    media.id                 = GetJSONStringValue(data, "id");
+    media.type               = GetJSONStringValue(data, "type");
+    media.url                = GetJSONStringValue(data, "url");
+    media.preview_url        = GetJSONStringValue(data, "preview_url");
+    media.remote_url         = GetJSONStringValue(data, "remote_url");
+    media.preview_remote_url = GetJSONStringValue(data, "preview_remote_url");
+    media.text_url           = GetJSONStringValue(data, "text_url");
+    media.description        = GetJSONStringValue(data, "description");
+    media.blurhash           = GetJSONStringValue(data, "blurhash");
+    media.meta               = MediaMetadata{};
 
-  if (!data.is_null(), data.is_array()) {
-    for (const auto& item : data) {
-      Media media{};
+    if (data["meta"].contains("original")) {
+      auto original = data["meta"]["original"];
 
-      media.id                 = GetJSONStringValue(item, "id");
-      media.type               = GetJSONStringValue(item, "type");
-      media.url                = GetJSONStringValue(item, "url");
-      media.preview_url        = GetJSONStringValue(item, "preview_url");
-      media.remote_url         = GetJSONStringValue(item, "remote_url");
-      media.preview_remote_url = GetJSONStringValue(item, "preview_remote_url");
-      media.text_url           = GetJSONStringValue(item, "text_url");
-      media.description        = GetJSONStringValue(item, "description");
-      media.blurhash           = GetJSONStringValue(item, "blurhash");
-      media.meta               = MediaMetadata{};
-
-      if (item["meta"].contains("original")) {
-        auto original = item["meta"]["original"];
-
-        media.meta.original = MetaDetails{
-          .width    = original["width"],
-          .height   = original["height"],
-          .size     = original["size"],
-          .aspect   = original["aspect"]
-        };
-      }
-
-      if (item["meta"].contains("small")) {
-        auto small = item["meta"]["small"];
-
-        media.meta.small = MetaDetails{
-          .width    = small["width"],
-          .height   = small["height"],
-          .size     = small["size"],
-          .aspect   = small["aspect"]
-        };
-      }
-
-      media_v.emplace_back(std::move(media));
+      media.meta.original = MetaDetails{
+        .width    = original["width"],
+        .height   = original["height"],
+        .size     = original["size"],
+        .aspect   = original["aspect"]
+      };
     }
 
+    if (data["meta"].contains("small")) {
+      auto small = data["meta"]["small"];
+
+      media.meta.small = MetaDetails{
+        .width    = small["width"],
+        .height   = small["height"],
+        .size     = small["size"],
+        .aspect   = small["aspect"]
+      };
+    }
+  }
+
+  return media;
+}
+
+inline std::vector<Media> ParseMediaFromJSONArr(nlohmann::json data) {
+  std::vector<Media> media_v{};
+
+  if (!data.is_null() && data.is_array()) {
+    for (const auto& item : data) {
+      media_v.emplace_back(ParseMediaFromJSON(item));
+    }
   }
 
   return media_v;
@@ -476,7 +492,7 @@ inline Status JSONToStatus(nlohmann::json data) {
     status.application.name    = GetJSONStringValue    (data["application"], "name");
     status.application.url     = GetJSONStringValue    (data["application"], "website");
     status.account             = ParseAccountFromJSON  (data["account"]);
-    status.media               = ParseMediaFromJSON    (data["media_attachments"]);
+    status.media               = ParseMediaFromJSONArr (data["media_attachments"]);
     status.mentions            = ParseMentionsFromJSON (data["mentions"]);
     status.tags                = ParseTagsFromJSON     (data["tags"]);
     status.emojis              = GetJSONValue<std::vector<std::string>>(data, "emojis");
