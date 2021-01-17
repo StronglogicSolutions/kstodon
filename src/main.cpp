@@ -10,7 +10,7 @@ std::string              description;
 
 ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
   ExecuteConfig config{};
-  
+
   for (int i = 1; i < argc; i++) {
     std::string argument = SanitizeInput(argv[i]);
     if (argument.find("--header") == 0){
@@ -24,7 +24,7 @@ ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
     }
     else
     if (argument.find("--filename") == 0) {
-      config.file_paths.emplace_back(argument.substr(12));
+      config.file_paths.emplace_back(argument.substr(11));
       continue;
     }
   }
