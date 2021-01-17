@@ -97,8 +97,6 @@ class Authenticator {
 public:
 
 Authenticator() {
-  std::string cwd_path = get_executable_cwd();
-  log(cwd_path);
   INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
   if (reader.ParseError() < 0) {
@@ -106,7 +104,7 @@ Authenticator() {
     throw std::invalid_argument{"No configuration path"};
   }
 
-  auto credentials = ParseCredentialsFromJSON(LoadJSONFile(constants::CONFIG_JSON_PATH));
+  auto credentials = ParseCredentialsFromJSON(LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH));
 
   if (!credentials.is_valid()) {
     throw std::invalid_argument{"Credentials not found"};
@@ -114,7 +112,7 @@ Authenticator() {
 
   m_credentials = credentials;
 
-  auto auth = ParseAuthFromJSON(LoadJSONFile(constants::TOKEN_JSON_PATH));
+  auto auth = ParseAuthFromJSON(LoadJSONFile(get_executable_cwd() + "../" + constants::TOKEN_JSON_PATH));
 
   if (auth.is_valid()) {
     m_auth = auth;
