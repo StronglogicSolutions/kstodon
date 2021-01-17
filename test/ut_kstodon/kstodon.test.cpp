@@ -41,7 +41,7 @@ TEST(KStodonTests, ClientHasAuth) {
   EXPECT_TRUE(client_has_auth);
 }
 
-TEST(KStodonTests, DISABLED_FetchStatus) {
+TEST(KStodonTests, FetchStatus) {
   using namespace kstodon;
 
   // uint64_t TEST_ID{105528916039043648};
@@ -50,6 +50,8 @@ TEST(KStodonTests, DISABLED_FetchStatus) {
   Client client{};
 
   Status status = client.FetchStatus(TEST_ID);
+
+  std::cout << status << std::endl;
 
   EXPECT_TRUE(status.id == TEST_ID);
 }
@@ -92,10 +94,10 @@ TEST(KStodonTests, DISABLED_PostMedia) {
 
   file.description = "This is a test file!";
 
-  bool  path_is_valid     = file.GetBytes().size() > 0;
-  bool  is_media_client   = (dynamic_cast<MastodonMediaClient*>(&client) != nullptr);
-  Media media             = client.PostMedia(file);
-  bool media_post_result  = !media.id.empty();
+  bool   path_is_valid     = file.GetBytes().size() > 0;
+  bool   is_media_client   = (dynamic_cast<MastodonMediaClient*>(&client) != nullptr);
+  Media  media             = client.PostMedia(file);
+  bool   media_post_result = !media.id.empty();
   Status status{};
 
   status.content = "This is a test!";
@@ -112,7 +114,8 @@ TEST(KStodonTests, PostStatusWithFile) {
   using namespace kstodon;
 
   Status status{};
-  status.content = "This is another test, yo!";
+
+  status.content = "Uhoh!";
 
   bool result = Client{}.PostStatus(
     status, std::vector<File>{
