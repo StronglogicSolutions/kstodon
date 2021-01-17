@@ -289,11 +289,17 @@ return o;
 };
 
 struct Status : public PostDataInterface {
+Status()
+: sensitive(false) {}
+
+Status(std::string text)
+: sensitive(false), content(text) {}
+
 uint64_t                 id;
 std::string              created_at;
 std::string              replying_to_id;
 std::string              replying_to_account;
-bool                     sensitive            = false;
+bool                     sensitive;
 std::string              spoiler;
 std::string              visibility;
 std::string              language;
