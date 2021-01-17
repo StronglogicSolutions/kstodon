@@ -97,6 +97,8 @@ class Authenticator {
 public:
 
 Authenticator() {
+  std::string cwd_path = get_executable_cwd();
+  log(cwd_path);
   INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
   if (reader.ParseError() < 0) {
