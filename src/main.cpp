@@ -10,20 +10,22 @@ std::string              description;
 
 ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
   ExecuteConfig config{};
-
+  
   for (int i = 1; i < argc; i++) {
     std::string argument = SanitizeInput(argv[i]);
-    if (argument.find("--header") >= 0) {
+    if (argument.find("--header") == 0){
       config.message = argument.substr(9);
       continue;
     }
     else
-    if (argument.find("--description") >= 0) {
+    if (argument.find("--description") == 0) {
       config.description = argument.substr(14);
+      continue;
     }
     else
-    if (argument.find("--filename") >= 0) {
+    if (argument.find("--filename") == 0) {
       config.file_paths.emplace_back(argument.substr(12));
+      continue;
     }
   }
 
