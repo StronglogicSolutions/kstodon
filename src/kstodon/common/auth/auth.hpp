@@ -133,8 +133,9 @@ Authenticator(std::string username = "")
 
     m_username = name;
   }
-  auto m_credentials_json  = LoadJSONFile(constants::CONFIG_JSON_PATH);
-  auto credentials         = ParseCredentialsFromJSON(m_credentials_json, m_username);
+
+  m_credentials_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
+  auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {
     throw std::invalid_argument{"Credentials not found"};
@@ -142,7 +143,7 @@ Authenticator(std::string username = "")
 
   m_credentials = credentials;
 
-  m_token_json = LoadJSONFile(constants::TOKEN_JSON_PATH);
+  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
 
   if (
     m_token_json.contains("users")    &&
