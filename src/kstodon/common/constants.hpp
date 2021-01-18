@@ -8,6 +8,8 @@ const bool        JSON_PARSE_NO_THROW{false};
 const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
 const std::string CONFIG_JSON_PATH   {"config/credentials.json"};
 const std::string TOKEN_JSON_PATH    {"config/token.json"};
+const std::string KSTODON_SECTION    {"kstodon"};
+const std::string USER_CONFIG_KEY    {"user"};
 
 const uint8_t HEADER_AUTH_INDEX = 0x00;
 

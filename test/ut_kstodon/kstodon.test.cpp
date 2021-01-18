@@ -110,7 +110,7 @@ TEST(KStodonTests, DISABLED_PostMedia) {
   EXPECT_TRUE(status_post_result);
 }
 
-TEST(KStodonTests, PostStatusWithFile) {
+TEST(KStodonTests, DISABLED_PostStatusWithFile) {
   using namespace kstodon;
 
   Status status{};

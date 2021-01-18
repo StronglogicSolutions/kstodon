@@ -35,21 +35,39 @@ inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
   );
 }
 
-inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file) {
+inline bool JSONHasUser(nlohmann::json data, std::string username) {
+  auto is_null = data.is_null();
+  auto is_obj  = data.is_object();
+  auto hasname = data.contains(username);
+
+  return (!data.is_null() && data.is_object() && data.contains(username));
+}
+
+inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username) {
   using json = nlohmann::json;
 
   Credentials creds{};
 
-  if (ValidateCredentialsJSON(json_file)) {
-    creds.id =            SanitizeJSON(json_file["id"].dump());
-    creds.name =          SanitizeJSON(json_file["name"].dump());
-    creds.website =       SanitizeJSON(json_file["website"].dump());
-    creds.redirect_uri =  SanitizeJSON(json_file["redirect_uri"].dump());
-    creds.scope        =  SanitizeJSON(json_file["scope"].dump());
-    creds.client_id =     SanitizeJSON(json_file["client_id"].dump());
-    creds.client_secret = SanitizeJSON(json_file["client_secret"].dump());
-    creds.vapid_key =     SanitizeJSON(json_file["vapid_key"].dump());
-    creds.code =          SanitizeJSON(json_file["code"].dump());
+  if (json_file.contains("users")) {
+    json users_json = json_file["users"];
+
+    if (
+      !users_json.is_null()            &&
+      JSONHasUser(users_json, username) &&
+      ValidateCredentialsJSON(users_json[username])) {
+
+      json user_json = users_json[username];
+
+      creds.id =            GetJSONStringValue(user_json, "id");
+      creds.name =          GetJSONStringValue(user_json, "name");
+      creds.website =       GetJSONStringValue(user_json, "website");
+      creds.redirect_uri =  GetJSONStringValue(user_json, "redirect_uri");
+      creds.scope        =  GetJSONStringValue(user_json, "scope");
+      creds.client_id =     GetJSONStringValue(user_json, "client_id");
+      creds.client_secret = GetJSONStringValue(user_json, "client_secret");
+      creds.vapid_key =     GetJSONStringValue(user_json, "vapid_key");
+      creds.code =          GetJSONStringValue(user_json, "code");
+    }
   }
 
   return creds;
@@ -82,10 +100,10 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
   Auth auth{};
 
   if (ValidateAuthJSON(json_file)) {
-    auth.access_token =  SanitizeJSON(json_file["access_token"].dump());
-    auth.token_type   =  SanitizeJSON(json_file["token_type"].dump());
-    auth.scope        =  SanitizeJSON(json_file["scope"].dump());
-    auth.created_at   =  SanitizeJSON(json_file["created_at"].dump());
+    auth.access_token =  GetJSONStringValue(json_file, "access_token");
+    auth.token_type   =  GetJSONStringValue(json_file, "token_type");
+    auth.scope        =  GetJSONStringValue(json_file, "scope");
+    auth.created_at   =  std::to_string(GetJSONValue<uint32_t>(json_file, "created_at"));
   }
 
   return auth;
@@ -96,15 +114,27 @@ class Authenticator {
 
 public:
 
-Authenticator() {
-  INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
+Authenticator(std::string username = "")
+: m_username(username) {
+  if (m_username.empty()) {
+    INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
-  if (reader.ParseError() < 0) {
-    log("Error loading config");
-    throw std::invalid_argument{"No configuration path"};
+    if (reader.ParseError() < 0) {
+      log("Error loading config");
+      throw std::invalid_argument{"No configuration path"};
+    }
+
+
+    auto name = reader.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
+
+    if (name.empty()) {
+      throw std::invalid_argument{"No username in config. Please provide a username"};
+    }
+
+    m_username = name;
   }
-
-  auto credentials = ParseCredentialsFromJSON(LoadJSONFile(constants::CONFIG_JSON_PATH));
+  auto m_credentials_json  = LoadJSONFile(constants::CONFIG_JSON_PATH);
+  auto credentials         = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {
     throw std::invalid_argument{"Credentials not found"};
@@ -112,10 +142,19 @@ Authenticator() {
 
   m_credentials = credentials;
 
-  auto auth = ParseAuthFromJSON(LoadJSONFile(constants::TOKEN_JSON_PATH));
+  m_token_json = LoadJSONFile(constants::TOKEN_JSON_PATH);
 
-  if (auth.is_valid()) {
-    m_auth = auth;
+  if (
+    m_token_json.contains("users")    &&
+    !m_token_json["users"].is_null()  &&
+    m_token_json["users"].contains(m_username) &&
+    !m_token_json["users"][m_username].is_null()) {
+
+    auto auth = ParseAuthFromJSON(m_token_json["users"][m_username]);
+
+    if (auth.is_valid()) {
+      m_auth = auth;
+    }
   }
 }
 
@@ -155,7 +194,8 @@ bool FetchToken() {
 
       if (auth.is_valid()) {
         m_auth = auth;
-        SaveToFile(AuthToJSON(auth), constants::TOKEN_JSON_PATH);
+        m_token_json["users"][m_username] = auth_json;
+        SaveToFile(m_token_json.dump(), constants::TOKEN_JSON_PATH);
         return true;
       } else {
         log("Failed to parse token");
@@ -238,10 +278,16 @@ Account GetAccount() {
 }
 
 private:
+using json = nlohmann::json;
+
 Credentials  m_credentials;
 Auth         m_auth;
 Account      m_account;
+std::string  m_username;
 bool         m_authenticated;
+json         m_token_json;
+json         m_credentials_json;
+
 };
 
 #endif // __AUTH_HPP__
