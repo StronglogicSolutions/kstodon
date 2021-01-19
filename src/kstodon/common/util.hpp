@@ -19,6 +19,14 @@ inline void SaveToFile(std::string data, std::string path) {
 }
 
 /**
+ * SaveToFile
+ */
+inline void SaveToFile(nlohmann::json data, std::string path) {
+  std::ofstream o{path};
+  o << data;
+}
+
+/**
  * ReadFromFile
  */
 inline std::string ReadFromFile(std::string path) {

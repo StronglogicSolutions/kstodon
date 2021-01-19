@@ -51,6 +51,15 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 
 }
 
+/**
+ * PostStatus
+ *
+ * TODO: return Status object (updated)
+ *
+ * @param status
+ * @return true
+ * @return false
+ */
 bool Client::PostStatus(Status status) {
   using namespace constants;
   using json = nlohmann::json;
@@ -64,7 +73,7 @@ bool Client::PostStatus(Status status) {
     },
     cpr::Body{status.postdata()}
   );
-
+  std::cout << r.text << std::endl;
   Status returned_status = JSONToStatus(json::parse(r.text, nullptr, JSON_PARSE_NO_THROW));
 
   if (!returned_status.content.empty()) {
@@ -85,8 +94,6 @@ Media Client::PostMedia(File file) {
     },
     file.multiformdata()
   );
-
-  std::cout << r.text << std::endl;
 
   if (r.status_code < 400) {
     return ParseMediaFromJSON(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));

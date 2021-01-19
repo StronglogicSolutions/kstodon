@@ -21,21 +21,24 @@ namespace kstodon {
 inline bool SaveStatusID(uint64_t status_id, std::string username) {
   using namespace nlohmann;
   json database_json;
-  json loaded_json = LoadJSONFile(constants::DB_JSON_PATH);
+  json loaded_json = LoadJSONFile(get_executable_cwd() + "../" + constants::DB_JSON_PATH);
 
   if (loaded_json.is_null())
     database_json = {"status", {status_id}};
   else
   {
-  json user_status_array_json = database_json["status"][username];
+    database_json = loaded_json;
+    json user_status_array_json = database_json["status"][username];
+
     if (!user_status_array_json.empty()) {
       for (const auto& id : user_status_array_json.get<const std::vector<uint64_t>>())
         if (id == status_id) return false; // Already exists
     }
+
     database_json["status"][username].emplace_back(status_id);
   }
 
-  SaveToFile(database_json.dump(), constants::DB_JSON_PATH);
+  SaveToFile(database_json, constants::DB_JSON_PATH);
 
   return true;
 }
