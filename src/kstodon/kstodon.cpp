@@ -53,6 +53,7 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 
 bool Client::PostStatus(Status status) {
   using namespace constants;
+  using json = nlohmann::json;
 
   const std::string URL = BASE_URL + PATH.at(STATUSES_INDEX);
 
@@ -64,6 +65,11 @@ bool Client::PostStatus(Status status) {
     cpr::Body{status.postdata()}
   );
 
+  Status returned_status = JSONToStatus(json::parse(r.text, nullptr, JSON_PARSE_NO_THROW));
+
+  if (!returned_status.content.empty()) {
+    SaveStatusID(returned_status.id, m_authenticator.GetUsername());
+  }
   return (r.status_code < 400);
 }
 

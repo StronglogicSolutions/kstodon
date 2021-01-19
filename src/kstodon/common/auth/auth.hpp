@@ -143,7 +143,7 @@ Authenticator(std::string username = "")
 
   m_credentials = credentials;
 
-  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
+  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::TOKEN_JSON_PATH);
 
   if (
     m_token_json.contains("users")    &&
@@ -276,6 +276,10 @@ Credentials get_credentials() {
 
 Account GetAccount() {
   return m_account;
+}
+
+std::string GetUsername() {
+  return m_username;
 }
 
 private:
