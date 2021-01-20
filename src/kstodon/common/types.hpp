@@ -51,7 +51,6 @@ cpr::Multipart multiformdata() {
     {"file", cpr::File{path}}
   };
 }
-
 };
 
 namespace StatusVisibility {

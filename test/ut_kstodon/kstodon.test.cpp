@@ -1,7 +1,7 @@
 #include "kstodon.test.hpp"
 
 
-TEST(KStodonTests, Instantiate) {
+TEST(KStodonTests, DISABLED_Instantiate) {
   ASSERT_NO_THROW(kstodon::Client{});
 }
 
@@ -15,7 +15,7 @@ TEST(KStodonTests, DISABLED_FetchAuthToken) {
   EXPECT_TRUE(fetch_success);
 }
 
-TEST(KStodonTests, DISABLED_VerifyAuth) {
+TEST(KStodonTests, VerifyAuth) {
   using namespace kstodon;
 
   Authenticator authenticator{};
@@ -29,9 +29,10 @@ TEST(KStodonTests, DISABLED_VerifyAuth) {
   EXPECT_TRUE(has_valid_token);
   EXPECT_TRUE(verified_token);
   EXPECT_EQ(account.username, "logicp");
+  EXPECT_EQ(account.id, "154950");
 }
 
-TEST(KStodonTests, ClientHasAuth) {
+TEST(KStodonTests, DISABLED_ClientHasAuth) {
   using namespace kstodon;
 
   Client client{};
@@ -41,7 +42,7 @@ TEST(KStodonTests, ClientHasAuth) {
   EXPECT_TRUE(client_has_auth);
 }
 
-TEST(KStodonTests, FetchStatus) {
+TEST(KStodonTests, DISABLED_FetchStatus) {
   using namespace kstodon;
 
   // uint64_t TEST_ID{105528916039043648};
@@ -114,8 +115,10 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
   using namespace kstodon;
 
   Status status{};
+  status.replying_to_id = "105586303075566178";
+  status.visibility = StatusVisibility::DIRECT;
 
-  status.content = "Uhoh!";
+  status.content = "not this again!";
 
   bool result = Client{}.PostStatus(
     status, std::vector<File>{

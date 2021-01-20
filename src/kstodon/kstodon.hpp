@@ -18,6 +18,37 @@ namespace kstodon {
   └───────────────────────────────────────────────────────────┘
 */
 
+class SecureClient {
+public:
+virtual ~SecureClient() {}
+virtual bool    HasAuth() = 0;
+virtual Account GetAccount() = 0;
+};
+
+class MastodonStatusClient {
+public:
+using UserID   = std::string;
+using StatusID = uint64_t;
+
+virtual ~MastodonStatusClient() {}
+virtual Status              FetchStatus(StatusID id) = 0;
+virtual std::vector<Status> FetchUserStatuses(UserID id) = 0;
+virtual bool                PostStatus(Status status) = 0;
+};
+
+class MastodonMediaClient {
+public:
+virtual ~MastodonMediaClient() {}
+virtual Media PostMedia(File file) = 0;
+virtual bool  PostStatus(Status status, std::vector<File> media) = 0;
+};
+
+
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░ HelperFns ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
 inline bool SaveStatusID(uint64_t status_id, std::string username) {
   using namespace nlohmann;
   json database_json;
@@ -43,34 +74,25 @@ inline bool SaveStatusID(uint64_t status_id, std::string username) {
   return true;
 }
 
-class SecureClient {
-public:
-virtual ~SecureClient() {}
-virtual bool HasAuth() = 0;
-};
+inline std::vector<uint64_t> GetSavedStatusIDs(std::string username) {
+  using json = nlohmann::json;
 
-class MastodonStatusClient {
-public:
-using UserID   = std::string;
-using StatusID = uint64_t;
+  json db_json = LoadJSONFile(get_executable_cwd() + "../" + constants::DB_JSON_PATH);
 
-virtual ~MastodonStatusClient() {}
-virtual Status              FetchStatus(StatusID id) = 0;
-virtual std::vector<Status> FetchUserStatuses(UserID id) = 0;
-virtual bool                PostStatus(Status status) = 0;
-};
+  if (!db_json.is_null()                   &&
+      db_json.contains("status")           &&
+      db_json["status"].contains(username) &&
+      !db_json["status"][username].is_null()) {
+    return db_json["status"][username].get<std::vector<uint64_t>>();
+  }
 
-class MastodonMediaClient {
-public:
-virtual ~MastodonMediaClient() {}
-virtual Media PostMedia(File file) = 0;
-virtual bool  PostStatus(Status status, std::vector<File> media) = 0;
-};
+  return std::vector<uint64_t>{};
+}
 
 /**
   @class
   ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░░ KLytics ░░░░░░░░░░░░░░░░░░░░░░░│
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░░ KStodon ░░░░░░░░░░░░░░░░░░░░░░░│
   └───────────────────────────────────────────────────────────┘
 */
 
@@ -88,6 +110,7 @@ virtual std::vector<Status> FetchUserStatuses(UserID id) override;
 virtual bool                PostStatus(Status status) override;
 virtual bool                PostStatus(Status status, std::vector<File> media) override;
 virtual Media               PostMedia(File file) override;
+virtual Account             GetAccount() override;
 
 private:
 using json = nlohmann::json;

@@ -110,12 +110,16 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
 }
 
 
+
+
 class Authenticator {
 
 public:
 
 Authenticator(std::string username = "")
-: m_username(username) {
+: m_username(username),
+  m_authenticated(false)
+{
   if (m_username.empty()) {
     INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
@@ -155,6 +159,7 @@ Authenticator(std::string username = "")
 
     if (auth.is_valid()) {
       m_auth = auth;
+      m_authenticated = true;
     }
   }
 }
@@ -195,6 +200,7 @@ bool FetchToken() {
 
       if (auth.is_valid()) {
         m_auth = auth;
+        m_authenticated = true;
         m_token_json["users"][m_username] = auth_json;
         SaveToFile(m_token_json.dump(), constants::TOKEN_JSON_PATH);
         return true;

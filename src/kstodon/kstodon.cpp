@@ -109,4 +109,8 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
   }
   return PostStatus(status);
 }
+
+Account Client::GetAccount() {
+  return m_authenticator.GetAccount();
+}
 } // namespace kstodon
