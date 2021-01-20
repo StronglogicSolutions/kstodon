@@ -53,6 +53,24 @@ cpr::Multipart multiformdata() {
 }
 
 };
+
+namespace StatusVisibility {
+const std::string PUBLIC  {"public"};
+const std::string UNLISTED{"unlisted"};
+const std::string PRIVATE {"private"};
+const std::string DIRECT  {"direct"};
+};
+
+inline bool visibility_is_valid(const std::string& visibility) {
+  using namespace StatusVisibility;
+  return (
+    visibility.compare(PUBLIC)   == 0 ||
+    visibility.compare(UNLISTED) == 0 ||
+    visibility.compare(PRIVATE)  == 0 ||
+    visibility.compare(DIRECT)   == 0
+  );
+}
+
 inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
   if (!data.is_null() && data.contains(key) && !data[key].is_null())
     return data[key].get<std::string>();
@@ -365,20 +383,19 @@ virtual std::string postdata() override {
     delim = ",";
   }
 
-  return (replying_to_id.empty()) ?
-  std::string{
-    "status="       + content   + "&" +
-    "media_ids[]="  + media_ids + "&" +
-    "spoiler_text=" + spoiler   + "&" +
-    "sensitive="    + std::to_string(sensitive)
-  } :
-  std::string{
-    "status="       + content   + "&" +
+  if (!visibility.empty() && !visibility_is_valid(visibility))
+    throw std::invalid_argument{"This visibility is not recognized"};
+
+  std::string RC{
+    "status="         + content   + "&" +
     "media_ids[]="    + media_ids + "&" +
-    "spoiler_text=" + spoiler   + "&" +
-    "sensitive="    + std::to_string(sensitive) + "&" +
-    "in_reply_to="  + replying_to_id
+    "spoiler_text="   + spoiler   + "&" +
+    "in_reply_to_id=" + replying_to_id + "&" +
+    "visibility="     + visibility + "&" +
+    "sensitive="      + std::to_string(sensitive)
   };
+
+  return RC;
 }
 
 virtual ~Status() override {}
@@ -436,10 +453,10 @@ inline Media ParseMediaFromJSON(nlohmann::json data) {
       auto original = data["meta"]["original"];
 
       media.meta.original = MetaDetails{
-        .width    = original["width"],
-        .height   = original["height"],
-        .size     = original["size"],
-        .aspect   = original["aspect"]
+        .width    = GetJSONValue<uint32_t>(original, "width"),
+        .height   = GetJSONValue<uint32_t>(original, "height"),
+        .size     = GetJSONStringValue(original, "size"),
+        .aspect   = GetJSONValue<float>(original, "aspect")
       };
     }
 
@@ -478,8 +495,9 @@ inline std::vector<Media> ParseMediaFromJSONArr(nlohmann::json data) {
  */
 inline Status JSONToStatus(nlohmann::json data) {
   Status status{};
-
-  if (!data.is_null() && data.is_object()) {
+  try {
+    if (!data.is_null() && data.is_object()) {
+    std::cout << data.dump() << std::endl;
     status.id                  = std::stoul(data["id"].get<std::string>());
     status.created_at          = GetJSONStringValue    (data, "created_at");
     status.replying_to_id      = GetJSONStringValue    (data, "in_reply_to");
@@ -504,6 +522,10 @@ inline Status JSONToStatus(nlohmann::json data) {
     status.emojis              = GetJSONValue<std::vector<std::string>>(data, "emojis");
   }
 
+  return status;
+  } catch (std::exception& e) {
+    std::cout << e.what();
+  }
   return status;
 }
 
