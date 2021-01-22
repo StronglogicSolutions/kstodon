@@ -15,7 +15,7 @@ TEST(KStodonTests, DISABLED_FetchAuthToken) {
   EXPECT_TRUE(fetch_success);
 }
 
-TEST(KStodonTests, VerifyAuth) {
+TEST(KStodonTests, DISABLED_VerifyAuth) {
   using namespace kstodon;
 
   Authenticator authenticator{};
@@ -127,4 +127,12 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
   );
 
   EXPECT_TRUE(result);
+}
+
+TEST(KStodonTests, FindRepliesToStatus) {
+  kstodon::Bot bot{};
+
+  std::vector<Status> replies = bot.FindReplies();
+
+  EXPECT_FALSE(replies.empty());
 }

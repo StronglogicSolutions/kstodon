@@ -2,7 +2,7 @@
 #define __KSTODON_TEST_HPP__
 #include "gtest/gtest.h"
 
-#include "kstodon/kstodon.hpp"
+#include "kstodon/bot/bot.hpp"
 
 const std::string TEST_PATH{get_executable_cwd() + "../test/ut_kstodon/data/test_file.jpg"};
 
