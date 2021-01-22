@@ -27,6 +27,13 @@ Status Client::FetchStatus(uint64_t id) {
     cpr::Url{STATUSES_URL}
   );
 
+  if (r.status_code >= 400) {
+    // Error handling
+    std::string error_message{
+      "Request failed with message: " + r.error.message
+    };
+  }
+
   if (!r.text.empty()) {
     return JSONToStatus(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
   }
@@ -110,7 +117,31 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
   return PostStatus(status);
 }
 
+std::vector<Status> Client::FetchRepliesToStatus(uint64_t id) {
+  using namespace constants;
+
+  const std::string STATUSES_URL = BASE_URL + PATH.at(STATUSES_INDEX) + "/" + "context";
+
+  RequestResponse response{cpr::Get(
+    cpr::Url{STATUSES_URL},
+    cpr::Header{
+      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
+    }
+  )};
+
+  if (response.error) {
+    throw request_error{response.GetError()};
+  }
+
+  return JSONToStatuses(response.json()["descendants"]);
+}
+
 Account Client::GetAccount() {
   return m_authenticator.GetAccount();
 }
+
+std::string Client::GetUsername() {
+  return m_authenticator.GetUsername();
+}
+
 } // namespace kstodon

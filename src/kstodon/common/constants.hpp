@@ -3,6 +3,7 @@
 
 #include <string>
 
+
 namespace constants {
 const bool        JSON_PARSE_NO_THROW{false};
 const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};

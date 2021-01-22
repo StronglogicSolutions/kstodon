@@ -1,13 +1,6 @@
 #ifndef __KSTODON_HPP__
 #define __KSTODON_HPP__
 
-#include <iostream>
-#include <ctime>
-#include <cpr/cpr.h>
-#include <string>
-
-#include <nlohmann/json.hpp>
-
 #include "common/auth/auth.hpp"
 
 namespace kstodon {
@@ -111,6 +104,9 @@ virtual bool                PostStatus(Status status) override;
 virtual bool                PostStatus(Status status, std::vector<File> media) override;
 virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
+        std::string         GetUsername();
+
+std::vector<Status>         FetchRepliesToStatus(uint64_t id);
 
 private:
 using json = nlohmann::json;

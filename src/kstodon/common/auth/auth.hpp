@@ -2,10 +2,8 @@
 #define __AUTH_HPP__
 
 #include <INIReader.h>
-#include <nlohmann/json.hpp>
-#include <cpr/cpr.h>
 
-#include "kstodon/common/constants.hpp"
+#include "kstodon/common/request.hpp"
 #include "kstodon/common/types.hpp"
 
 inline const std::string get_executable_cwd() {
