@@ -106,7 +106,7 @@ virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
         std::string         GetUsername();
 
-std::vector<Status>         FetchRepliesToStatus(uint64_t id);
+std::vector<Conversation>         FetchRepliesToStatus(uint64_t id);
 
 private:
 using json = nlohmann::json;

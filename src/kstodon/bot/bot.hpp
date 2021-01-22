@@ -6,7 +6,7 @@
 class ConversationTracker {
 public:
 virtual ~ConversationTracker() {}
-virtual std::vector<Status> FindReplies() = 0;
+virtual std::vector<Conversation> FindReplies() = 0;
 };
 
 
@@ -21,12 +21,12 @@ Bot()
   }
 }
 
-std::vector<Status> FindReplies() override {
+std::vector<Conversation> FindReplies() override {
   std::vector<uint64_t> status_ids = GetSavedStatusIDs(m_client.GetUsername());
-  std::vector<Status> replies{};
+  std::vector<Conversation> replies{};
   for (const auto& id : status_ids) {
     try {
-      std::vector<Status> retrieved_statuses = m_client.FetchRepliesToStatus(id);
+      std::vector<Conversation> retrieved_statuses = m_client.FetchRepliesToStatus(id);
       replies.insert(
         replies.end(),
         std::make_move_iterator(retrieved_statuses.begin()),

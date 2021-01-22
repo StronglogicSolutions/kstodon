@@ -117,13 +117,13 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
   return PostStatus(status);
 }
 
-std::vector<Status> Client::FetchRepliesToStatus(uint64_t id) {
+std::vector<Conversation> Client::FetchRepliesToStatus(uint64_t id) {
   using namespace constants;
 
-  const std::string STATUSES_URL = BASE_URL + PATH.at(STATUSES_INDEX) + "/" + "context";
+  const std::string CONVERSATION_URL = BASE_URL + PATH.at(CONVERSATION_INDEX);
 
   RequestResponse response{cpr::Get(
-    cpr::Url{STATUSES_URL},
+    cpr::Url{CONVERSATION_URL},
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
     }
@@ -133,7 +133,7 @@ std::vector<Status> Client::FetchRepliesToStatus(uint64_t id) {
     throw request_error{response.GetError()};
   }
 
-  return JSONToStatuses(response.json()["descendants"]);
+  return JSONToConversation(response.json());
 }
 
 Account Client::GetAccount() {

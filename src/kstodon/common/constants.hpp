@@ -25,6 +25,7 @@ const uint8_t TOKEN_VERIFY_INDEX = 0x01;
 const uint8_t STATUSES_INDEX     = 0x02;
 const uint8_t ACCOUNTS_INDEX     = 0x03;
 const uint8_t MEDIA_INDEX        = 0x04;
+const uint8_t CONVERSATION_INDEX = 0x05;
 
 const std::string BASE_URL{"https://mastodon.online"};
 
@@ -33,7 +34,8 @@ const std::vector<std::string> PATH{
   "/api/v1/accounts/verify_credentials",
   "/api/v1/statuses",
   "/api/v1/accounts",
-  "/api/v1/media"
+  "/api/v1/media",
+  "/api/v1/conversations"
 };
 } // namespace MastodonOnline
 } // namespace constants

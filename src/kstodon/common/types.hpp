@@ -400,6 +400,12 @@ virtual std::string postdata() override {
 virtual ~Status() override {}
 };
 
+struct Conversation {
+std::string id;
+bool        unread;
+std::vector<Account> accounts;
+std::vector<Status>  statuses;
+};
 
 inline std::vector<Tag> ParseTagsFromJSON(nlohmann::json data) {
   std::vector<Tag> tags_v{};
@@ -486,6 +492,18 @@ inline std::vector<Media> ParseMediaFromJSONArr(nlohmann::json data) {
   return media_v;
 }
 
+inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
+  std::vector<Account> accounts{};
+  if (!data.is_null() && data.is_array()) {
+    for (const auto& item : data) {
+      if (!item.is_null() && item.is_object()) {
+        accounts.emplace_back(ParseAccountFromJSON(item));
+      }
+    }
+  }
+  return accounts;
+}
+
 /**
  * @brief
  *
@@ -496,7 +514,6 @@ inline Status JSONToStatus(nlohmann::json data) {
   Status status{};
   try {
     if (!data.is_null() && data.is_object()) {
-    std::cout << data.dump() << std::endl;
     status.id                  = std::stoul(data["id"].get<std::string>());
     status.created_at          = GetJSONStringValue    (data, "created_at");
     status.replying_to_id      = GetJSONStringValue    (data, "in_reply_to");
@@ -536,6 +553,26 @@ inline std::vector<Status> JSONToStatuses(nlohmann::json data) {
   }
 
   return statuses;
+}
+
+inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
+  std::vector<Conversation> conversations{};
+
+  if (!data.is_null() && data.is_array()) {
+    for (const auto& item : data) {
+      if (!item.is_null() && item.is_object()) {
+        conversations.emplace_back(
+          Conversation{
+            .id       = GetJSONStringValue(item, "id"),
+            .unread   = GetJSONBoolValue(item, "unread"),
+            .accounts = ParseAccountsFromJSON(item["accounts"]),
+            .statuses = std::vector<Status>{JSONToStatus(item["last_status"])}
+          }
+        );
+      }
+    }
+  }
+  return conversations;
 }
 
 #endif // __TYPES_HPP__

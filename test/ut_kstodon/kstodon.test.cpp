@@ -129,10 +129,17 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
   EXPECT_TRUE(result);
 }
 
-TEST(KStodonTests, FindRepliesToStatus) {
+TEST(KStodonTests, FetchConversations) {
   kstodon::Bot bot{};
 
-  std::vector<Status> replies = bot.FindReplies();
+  std::vector<Conversation> conversations = bot.FindReplies();
 
-  EXPECT_FALSE(replies.empty());
+  for (const auto& conversation : conversations) {
+    std::cout << "Conversation: " << conversation.id << std::endl;
+    for (const auto& status : conversation.statuses) {
+      std::cout << status << std::endl;
+    }
+  }
+
+  EXPECT_FALSE(conversations.empty());
 }
