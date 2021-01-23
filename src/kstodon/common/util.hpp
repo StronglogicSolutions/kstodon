@@ -10,6 +10,12 @@
 #include <fstream>
 #include <sstream>
 
+inline const std::string get_executable_cwd() {
+  char* path = realpath("/proc/self/exe", NULL);
+  char* name = basename(path);
+  return std::string{path, path + strlen(path) - strlen(name)};
+}
+
 /**
  * SaveToFile
  */
@@ -46,6 +52,11 @@ inline std::vector<uint8_t> ReadBytesFromFile(std::string path) {
   std::string file = ReadFromFile(path);
 
   return std::vector<uint8_t>{file.begin(), file.end()};
+}
+
+inline nlohmann::json LoadJSONFile(std::string path) {
+  using namespace nlohmann;
+  return json::parse(ReadFromFile(path), nullptr, constants::JSON_PARSE_NO_THROW);
 }
 
 /**

@@ -28,8 +28,11 @@ namespace kstodon {
 class Bot : public ConversationTracker {
 
 public:
-Bot()
-: m_client(Client{}) {
+Bot(const std::string& username = "")
+: m_client(Client{
+  username
+  })
+{
   if (!m_client.HasAuth()) {
     throw std::invalid_argument{"Client was not able to authenticate"};
   }

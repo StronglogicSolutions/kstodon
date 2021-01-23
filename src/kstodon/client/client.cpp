@@ -1,10 +1,10 @@
-#include "kstodon.hpp"
+#include "client.hpp"
 
 namespace kstodon {
 using namespace constants::MastodonOnline;
 
-Client::Client()
-: m_authenticator(Authenticator{}) {
+Client::Client(const std::string& username)
+: m_authenticator(Authenticator{username}) {
   if (!m_authenticator.HasValidToken()) {
     m_authenticator.FetchToken();
   }
