@@ -44,8 +44,8 @@ int main(int argc, char** argv)
       for (const auto& path : config.file_paths) 
         files.emplace_back(File{path});
 
-      (bot.PostStatus(Status{config.message}, files)) ?
-        stats.tx_msg++ : stats.tx_err++;                // tx or err
+    (bot.PostStatus(Status{config.message}, files)) ?
+      stats.tx_msg++ : stats.tx_err++;                  // tx or err
   }
 
   std_out += "Bot execution complete:\n" + stats.to_string();
