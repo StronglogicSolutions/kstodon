@@ -5,6 +5,7 @@
 
 #include "kstodon/kstodon.hpp"
 
+namespace kstodon {
 struct ExecuteConfig {
 std::string              message;
 std::vector<std::string> file_paths;
@@ -60,4 +61,4 @@ std::string to_string() {
          "\nRX err: " + std::to_string(rx_err);
 }
 };
-
+} // namespace kstodon

@@ -280,3 +280,51 @@ inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
   }
   return conversations;
 }
+
+inline std::vector<Conversation> ParseRepliesFromConversations(std::vector<Conversation> conversations, std::vector<uint64_t> status_ids) {
+  std::vector<Conversation> replies{};
+
+  for (auto&& conversation : conversations) {
+    if (
+      std::find(
+        status_ids.cbegin(),
+        status_ids.cend(),
+        string_to_uint64(conversation.status.replying_to_id)) != status_ids.cend())
+      replies.emplace_back(std::move(conversation));
+  }
+
+  return replies;
+}
+
+inline std::string PlatformFromURL(const std::string& url) {
+  const std::string::size_type begin_length{8};
+  auto begin = url.find_first_of("https://");
+  std::string return_s{};
+  if (begin != std::string::npos) {
+  auto end = url.find_last_of('@');
+    if (end != std::string::npos) {
+      return_s = url.substr(begin + begin_length, (end - (begin + begin_length - 1)));
+    }
+  }
+  return return_s;
+}
+
+/**
+ * MakeMention
+ *
+ * TODO: Create full HTML mention:
+ * <span class=\"h-card\">
+ *   <a href=\"https://mastodon.online/@username\" class=\"u-url mention\">
+ *     @<span>username</span>
+ *   </a>
+ * </span>
+ *
+ * @param status
+ * @return std::string
+ */
+inline std::string MakeMention(const Status& status) {
+  if (!status.account.username.empty() && !status.account.url.empty()) {
+    return '@' + status.account.username + '@' + PlatformFromURL(status.account.url);
+  }
+  return "";
+}

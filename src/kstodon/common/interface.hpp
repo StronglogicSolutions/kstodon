@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 
+namespace kstodon {
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ Interfaces ░░░░░░░░░░░░░░░░░░░░░░│
@@ -33,3 +34,10 @@ virtual Media PostMedia(File file) = 0;
 virtual bool  PostStatus(Status status, std::vector<File> media) = 0;
 };
 
+class ConversationTracker {
+public:
+virtual ~ConversationTracker() {}
+virtual std::vector<Conversation> FindReplies() = 0;
+};
+
+} // namespace kstodon
