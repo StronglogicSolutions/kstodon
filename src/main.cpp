@@ -11,22 +11,23 @@ int main(int argc, char** argv) {
   std::string       std_out{};
   ExecuteConfig     config = ParseRuntimeArguments(argc, argv);
 
-  if (config.execute_bot) {
+  if (config.execute_bot) {                           // USE BOT
     kstodon::Bot bot{config.username};
 
     std::vector<Conversation> replies = bot.FindReplies();
 
     for (const Conversation& reply : replies) {
-      stats.rx_msg++;
+      stats.rx_msg++;                                 // receive++
+      
       if (reply.status.is_valid()) {
         (bot.ReplyToStatus(reply.status)) ?
-          stats.tx_msg++ : stats.tx_err++;
+          stats.tx_msg++ : stats.tx_err++;            // send ++ or error++
       }
     }
     std_out += "Bot execution complete:\n" +
                stats.to_string();
   }
-  else {
+  else {                                              // USE CLIENT
     kstodon::Client   client{config.username};
     std::vector<File> files{};
 
