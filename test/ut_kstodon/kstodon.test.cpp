@@ -116,7 +116,7 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
 
   Status status{};
   status.replying_to_id = "105586303075566178";
-  status.visibility = StatusVisibility::DIRECT;
+  status.visibility = constants::StatusVisibility::DIRECT;
 
   status.content = "not this again!";
 
@@ -131,15 +131,14 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
 
 TEST(KStodonTests, FetchConversations) {
   kstodon::Bot bot{};
+  bool result{false};
 
-  std::vector<Conversation> conversations = bot.FindReplies();
+  auto replies = bot.FindReplies();
 
-  for (const auto& conversation : conversations) {
-    std::cout << "Conversation: " << conversation.id << std::endl;
-    for (const auto& status : conversation.statuses) {
-      std::cout << status << std::endl;
+  for (const auto& reply : replies) {
+    if (!reply.statuses.empty() && bot.ReplyToStatus(reply.statuses.front())) {
+      result = true;
     }
   }
-
-  EXPECT_FALSE(conversations.empty());
+  EXPECT_TRUE(result);
 }

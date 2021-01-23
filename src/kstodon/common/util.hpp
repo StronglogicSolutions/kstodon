@@ -148,4 +148,16 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
   return out;
 }
 
+inline uint64_t string_to_uint64(const std::string& s) {
+  uint64_t    value{};
+  const char* ptr = s.c_str();
+  const char* termination_character = ptr + s.size();
+
+  while (ptr < termination_character) {
+    value = (value << 1) + (value << 3) + *(ptr++) - '0';
+  }
+
+  return value;
+}
+
 #endif // __UTIL_HPP__

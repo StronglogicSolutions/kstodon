@@ -82,6 +82,32 @@ inline std::vector<uint64_t> GetSavedStatusIDs(std::string username) {
   return std::vector<uint64_t>{};
 }
 
+inline bool RemoveStatusID(std::string username, uint64_t id) {
+  using json = nlohmann::json;
+  bool result{false};
+  json db_json = LoadJSONFile(get_executable_cwd() + "../" + constants::DB_JSON_PATH);
+
+  if (!db_json.is_null()                 &&
+    db_json.contains("status")           &&
+    db_json["status"].contains(username) &&
+    !db_json["status"][username].is_null()) {
+
+    for (int i = 0; i < db_json["status"][username].size(); i++) {
+      if (db_json["status"][username][i].get<uint64_t>() == id) {
+        db_json["status"][username].erase(i);
+        result = true;
+        break;
+      }
+    }
+  }
+
+  if (result) {
+    SaveToFile(db_json, constants::DB_JSON_PATH);
+  }
+
+  return result;
+}
+
 /**
   @class
   ┌───────────────────────────────────────────────────────────┐
@@ -106,7 +132,7 @@ virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
         std::string         GetUsername();
 
-std::vector<Conversation>         FetchRepliesToStatus(uint64_t id);
+std::vector<Conversation>   FetchConversations();
 
 private:
 using json = nlohmann::json;

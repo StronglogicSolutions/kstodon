@@ -9,6 +9,18 @@ virtual ~ConversationTracker() {}
 virtual std::vector<Conversation> FindReplies() = 0;
 };
 
+inline std::vector<Conversation> ParseRepliesFromConversations(std::vector<Conversation> conversations, std::vector<uint64_t> status_ids) {
+  std::vector<Conversation> replies{};
+
+  for (auto&& conversation : conversations) {
+    auto status = conversation.statuses.front();
+
+    if (std::find(status_ids.cbegin(), status_ids.cend(), string_to_uint64(status.replying_to_id)) != status_ids.cend())
+      replies.emplace_back(std::move(conversation));
+  }
+
+  return replies;
+}
 
 namespace kstodon {
 class Bot : public ConversationTracker {
@@ -23,21 +35,31 @@ Bot()
 
 std::vector<Conversation> FindReplies() override {
   std::vector<uint64_t> status_ids = GetSavedStatusIDs(m_client.GetUsername());
+  std::vector<Conversation> conversations;
   std::vector<Conversation> replies{};
-  for (const auto& id : status_ids) {
-    try {
-      std::vector<Conversation> retrieved_statuses = m_client.FetchRepliesToStatus(id);
-      replies.insert(
-        replies.end(),
-        std::make_move_iterator(retrieved_statuses.begin()),
-        std::make_move_iterator(retrieved_statuses.end())
-      );
-    }
-    catch (const request_error& e) {
-      log(e.what());
-    }
+
+  try {
+    conversations = m_client.FetchConversations();
   }
+  catch (const request_error& e) {
+    log(e.what());
+  }
+
+  replies = ParseRepliesFromConversations(conversations, status_ids);
+
   return replies;
+}
+
+bool ReplyToStatus(Status status) {
+  Status placeholder_response{};
+  placeholder_response.replying_to_id = std::to_string(status.id);
+  placeholder_response.content = status.account."This is the response. Take it or leave it.";
+  placeholder_response.visibility = status.visibility;
+  if (m_client.PostStatus(placeholder_response)) {
+    return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
+  }
+
+  return false;
 }
 
 private:

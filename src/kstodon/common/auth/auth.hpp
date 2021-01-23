@@ -4,7 +4,7 @@
 #include <INIReader.h>
 
 #include "kstodon/common/request.hpp"
-#include "kstodon/common/types.hpp"
+#include "kstodon/common/mastodon_util.hpp"
 
 inline const std::string get_executable_cwd() {
   char* path = realpath("/proc/self/exe", NULL);

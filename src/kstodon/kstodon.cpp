@@ -117,7 +117,7 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
   return PostStatus(status);
 }
 
-std::vector<Conversation> Client::FetchRepliesToStatus(uint64_t id) {
+std::vector<Conversation> Client::FetchConversations() {
   using namespace constants;
 
   const std::string CONVERSATION_URL = BASE_URL + PATH.at(CONVERSATION_INDEX);
