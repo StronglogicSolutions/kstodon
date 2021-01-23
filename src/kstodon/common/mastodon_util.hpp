@@ -200,8 +200,8 @@ inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
           Conversation{
             .id       = GetJSONStringValue(item, "id"),
             .unread   = GetJSONBoolValue(item, "unread"),
-            .accounts = ParseAccountsFromJSON(item["accounts"]),
-            .statuses = std::vector<Status>{JSONToStatus(item["last_status"])}
+            .status   = JSONToStatus(item["last_status"]),
+            .accounts = ParseAccountsFromJSON(item["accounts"])
           }
         );
       }

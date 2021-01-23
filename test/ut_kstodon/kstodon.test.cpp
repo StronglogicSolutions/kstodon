@@ -129,16 +129,18 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
   EXPECT_TRUE(result);
 }
 
-TEST(KStodonTests, FetchConversations) {
-  kstodon::Bot bot{};
-  bool result{false};
 
-  auto replies = bot.FindReplies();
+TEST(KStodonTests, FindAndReply) {
+  using namespace kstodon;
+
+  Bot bot{};
+
+  std::vector<Conversation> replies = bot.FindReplies();
 
   for (const auto& reply : replies) {
-    if (!reply.statuses.empty() && bot.ReplyToStatus(reply.statuses.front())) {
-      result = true;
-    }
+    if (reply.status.is_valid())
+      bot.ReplyToStatus(reply.status, "I don't suck, you suck!");
   }
-  EXPECT_TRUE(result);
+
+  EXPECT_FALSE(replies.empty());
 }

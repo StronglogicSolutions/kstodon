@@ -369,18 +369,25 @@ virtual std::string postdata() override {
   return RC;
 }
 
+bool is_valid() const {
+  return (!content.empty());
+}
+
 virtual ~Status() override {}
 };
 
 struct Conversation {
-std::string id;
-bool        unread;
+std::string          id;
+bool                 unread;
+Status               status;
 std::vector<Account> accounts;
-std::vector<Status>  statuses;
 
 friend std::ostream &operator<<(std::ostream& o, const Conversation& c) {
   o << "ConversationID: " << c.id << std::endl;
-  for (const auto& status : c.statuses) o << status;
+
+  if (!c.status.content.empty())
+    o << c.status;
+
   return o;
 }
 };

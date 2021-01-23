@@ -13,9 +13,11 @@ inline std::vector<Conversation> ParseRepliesFromConversations(std::vector<Conve
   std::vector<Conversation> replies{};
 
   for (auto&& conversation : conversations) {
-    auto status = conversation.statuses.front();
-
-    if (std::find(status_ids.cbegin(), status_ids.cend(), string_to_uint64(status.replying_to_id)) != status_ids.cend())
+    if (
+      std::find(
+        status_ids.cbegin(),
+        status_ids.cend(),
+        string_to_uint64(conversation.status.replying_to_id)) != status_ids.cend())
       replies.emplace_back(std::move(conversation));
   }
 
@@ -83,7 +85,7 @@ std::string MakeMention(const Status& status) {
   return "";
 }
 
-bool ReplyToStatus(Status status, std::string message = " This is the response. Take it or leave it.") {
+bool ReplyToStatus(Status status, std::string message = "This is the response. Take it or leave it.") {
   Status placeholder_response{};
   placeholder_response.replying_to_id = std::to_string(status.id);
   placeholder_response.content        = MakeMention(status) + message;
