@@ -6,6 +6,12 @@
 #include "kstodon/common/request.hpp"
 #include "kstodon/common/mastodon_util.hpp"
 
+inline const std::string get_dir() {
+  char* path = realpath("/proc/self/exe", NULL);
+  char* name = basename(path);
+  return std::string {path, path + strlen(path) - strlen(name)};
+}
+
 inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
   return(
     !json_file.is_null()                &&
@@ -108,7 +114,7 @@ Authenticator(std::string username = "")
   m_authenticated(false)
 {
   if (m_username.empty()) {
-    INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
+    INIReader reader{std::string{get_dir() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
     if (reader.ParseError() < 0) {
       log("Error loading config");
@@ -125,7 +131,7 @@ Authenticator(std::string username = "")
     m_username = name;
   }
 
-  m_credentials_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
+  m_credentials_json = LoadJSONFile(get_dir() + "../" + constants::CONFIG_JSON_PATH);
   auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {
@@ -134,7 +140,7 @@ Authenticator(std::string username = "")
 
   m_credentials = credentials;
 
-  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::TOKEN_JSON_PATH);
+  m_token_json = LoadJSONFile(get_dir() + "../" + constants::TOKEN_JSON_PATH);
 
   if (
     m_token_json.contains("users")    &&

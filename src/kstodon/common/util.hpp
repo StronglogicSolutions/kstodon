@@ -13,7 +13,9 @@
 inline const std::string get_executable_cwd() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
-  return std::string{path, path + strlen(path) - strlen(name)};
+  std::string executable_cwd{path, path + strlen(path) - strlen(name)};
+
+  return executable_cwd;
 }
 
 /**
