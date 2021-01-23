@@ -41,7 +41,8 @@ int main(int argc, char** argv)
   else                                                  // NORMAL MODE
   {
     if (!config.file_paths.empty())
-      for (const auto& path : config.file_paths) files.emplace_back(File{path});
+      for (const auto& path : config.file_paths) 
+        files.emplace_back(File{path});
 
       (bot.PostStatus(Status{config.message}, files)) ?
         stats.tx_msg++ : stats.tx_err++;                // tx or err
