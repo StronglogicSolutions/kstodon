@@ -50,11 +50,44 @@ std::vector<Conversation> FindReplies() override {
   return replies;
 }
 
-bool ReplyToStatus(Status status) {
+std::string PlatformFromURL(const std::string& url) {
+  const std::string::size_type begin_length{8};
+  auto begin = url.find_first_of("https://");
+  std::string return_s{};
+  if (begin != std::string::npos) {
+  auto end = url.find_last_of('@');
+    if (end != std::string::npos) {
+      return_s = url.substr(begin + begin_length, (end - (begin + begin_length - 1)));
+    }
+  }
+  return return_s;
+}
+
+/**
+ * MakeMention
+ *
+ * TODO: Create full HTML mention:
+ * <span class=\"h-card\">
+ *   <a href=\"https://mastodon.online/@username\" class=\"u-url mention\">
+ *     @<span>username</span>
+ *   </a>
+ * </span>
+ *
+ * @param status
+ * @return std::string
+ */
+std::string MakeMention(const Status& status) {
+  if (!status.account.username.empty() && !status.account.url.empty()) {
+    return '@' + status.account.username + '@' + PlatformFromURL(status.account.url);
+  }
+  return "";
+}
+
+bool ReplyToStatus(Status status, std::string message = " This is the response. Take it or leave it.") {
   Status placeholder_response{};
   placeholder_response.replying_to_id = std::to_string(status.id);
-  placeholder_response.content = status.account."This is the response. Take it or leave it.";
-  placeholder_response.visibility = status.visibility;
+  placeholder_response.content        = MakeMention(status) + message;
+  placeholder_response.visibility     = status.visibility;
   if (m_client.PostStatus(placeholder_response)) {
     return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
   }

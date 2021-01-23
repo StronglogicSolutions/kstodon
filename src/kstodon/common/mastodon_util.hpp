@@ -4,6 +4,7 @@
 
 inline Account ParseAccountFromJSON(nlohmann::json data) {
   Account account{};
+  std::string s = data.dump();
   if (!data.is_null()) {
     account.id              = GetJSONStringValue(data, "id");
     account.username        = GetJSONStringValue(data, "username");
@@ -124,6 +125,8 @@ inline std::vector<Media> ParseMediaFromJSONArr(nlohmann::json data) {
 
 inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
   std::vector<Account> accounts{};
+  std::string s = data.dump();
+
   if (!data.is_null() && data.is_array()) {
     for (const auto& item : data) {
       if (!item.is_null() && item.is_object()) {
@@ -142,6 +145,7 @@ inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
  */
 inline Status JSONToStatus(nlohmann::json data) {
   Status status{};
+  std::string s = data.dump();
   try {
     if (!data.is_null() && data.is_object()) {
     status.id                  = std::stoul(data["id"].get<std::string>());
@@ -191,6 +195,7 @@ inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
   if (!data.is_null() && data.is_array()) {
     for (const auto& item : data) {
       if (!item.is_null() && item.is_object()) {
+        std::string s = item.dump();
         conversations.emplace_back(
           Conversation{
             .id       = GetJSONStringValue(item, "id"),
