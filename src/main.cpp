@@ -3,6 +3,18 @@
 
 #include "config.hpp"
 
+/**
+ * KStodon Main
+ *
+ * KStodon Bot class will do one of the following:
+
+ * 1. Post message to Mastodon
+ * 2. Fetch replies to previous messages and send a new reply message
+ *
+ * @param   [in]  {int}    argc
+ * @param   [in]  {char**} argv
+ * @returns [out] {int}
+ */
 int main(int argc, char** argv)
 {
   if (argc < 2)
@@ -11,6 +23,7 @@ int main(int argc, char** argv)
   kstodon::ExecuteConfig config {kstodon::ParseRuntimeArguments(argc, argv)};
   kstodon::Bot           bot    {config.username};
   kstodon::BotStats      stats  {};
+  std::vector<File>      files  {};
   std::string            std_out{};
 
   if (config.execute_bot)                               // BOT MODE
@@ -19,29 +32,22 @@ int main(int argc, char** argv)
 
     for (const Conversation& reply : replies)
     {
-      stats.rx_msg++;                                   // rx
       if (reply.status.is_valid())
-      {
         (bot.ReplyToStatus(reply.status)) ?
           stats.tx_msg++ : stats.tx_err++;              // tx or err
-      }
+      stats.rx_msg++;                                   // rx
     }
   }
   else                                                  // NORMAL MODE
   {
-    std::vector<File> files{};
-
     if (!config.file_paths.empty())
-    {
-      for (const auto& path : config.file_paths)
-        files.emplace_back(File{path});
-    }
+      for (const auto& path : config.file_paths) files.emplace_back(File{path});
+
       (bot.PostStatus(Status{config.message}, files)) ?
         stats.tx_msg++ : stats.tx_err++;                // tx or err
   }
 
-  std_out += "Bot execution complete:\n" +
-               stats.to_string();
+  std_out += "Bot execution complete:\n" + stats.to_string();
 
   log(std_out);
 
