@@ -13,21 +13,21 @@ int main(int argc, char** argv)
   kstodon::BotStats      stats  {};
   std::string            std_out{};
 
-  if (config.execute_bot)
+  if (config.execute_bot)                               // BOT MODE
   {
     std::vector<Conversation> replies = bot.FindReplies();
 
     for (const Conversation& reply : replies)
     {
-      stats.rx_msg++;
+      stats.rx_msg++;                                   // rx
       if (reply.status.is_valid())
       {
         (bot.ReplyToStatus(reply.status)) ?
-          stats.tx_msg++ : stats.tx_err++;
+          stats.tx_msg++ : stats.tx_err++;              // tx or err
       }
     }
   }
-  else
+  else                                                  // NORMAL MODE
   {
     std::vector<File> files{};
 
@@ -37,13 +37,13 @@ int main(int argc, char** argv)
         files.emplace_back(File{path});
     }
       (bot.PostStatus(Status{config.message}, files)) ?
-        stats.tx_msg++ : stats.tx_err++;
+        stats.tx_msg++ : stats.tx_err++;                // tx or err
   }
 
   std_out += "Bot execution complete:\n" +
                stats.to_string();
 
-  std::cout << std_out << std::endl;
+  log(std_out);
 
   return 0;
 }
