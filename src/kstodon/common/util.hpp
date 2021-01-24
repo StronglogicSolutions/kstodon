@@ -10,6 +10,14 @@
 #include <fstream>
 #include <sstream>
 
+inline const std::string get_executable_cwd() {
+  char* path = realpath("/proc/self/exe", NULL);
+  char* name = basename(path);
+  std::string executable_cwd{path, path + strlen(path) - strlen(name)};
+
+  return executable_cwd;
+}
+
 /**
  * SaveToFile
  */
@@ -46,6 +54,11 @@ inline std::vector<uint8_t> ReadBytesFromFile(std::string path) {
   std::string file = ReadFromFile(path);
 
   return std::vector<uint8_t>{file.begin(), file.end()};
+}
+
+inline nlohmann::json LoadJSONFile(std::string path) {
+  using namespace nlohmann;
+  return json::parse(ReadFromFile(path), nullptr, constants::JSON_PARSE_NO_THROW);
 }
 
 /**
@@ -146,6 +159,18 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
     (void)(out);
   }
   return out;
+}
+
+inline uint64_t string_to_uint64(const std::string& s) {
+  uint64_t    value{};
+  const char* ptr = s.c_str();
+  const char* termination_character = ptr + s.size();
+
+  while (ptr < termination_character) {
+    value = (value << 1) + (value << 3) + *(ptr++) - '0';
+  }
+
+  return value;
 }
 
 #endif // __UTIL_HPP__

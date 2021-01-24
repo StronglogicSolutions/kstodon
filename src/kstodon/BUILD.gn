@@ -53,7 +53,7 @@ source_set("kstodon_sources") {
   ]
 
   sources = [
-    "//src/kstodon/kstodon.cpp",
+    "//src/kstodon/client/client.cpp",
   ]
 }
 

@@ -2,21 +2,14 @@
 #define __AUTH_HPP__
 
 #include <INIReader.h>
-#include <nlohmann/json.hpp>
-#include <cpr/cpr.h>
 
-#include "kstodon/common/constants.hpp"
-#include "kstodon/common/types.hpp"
+#include "kstodon/common/request.hpp"
+#include "kstodon/common/mastodon_util.hpp"
 
-inline const std::string get_executable_cwd() {
+inline const std::string get_dir() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
-  return std::string{path, path + strlen(path) - strlen(name)};
-}
-
-inline nlohmann::json LoadJSONFile(std::string path) {
-  using namespace nlohmann;
-  return json::parse(ReadFromFile(path), nullptr, constants::JSON_PARSE_NO_THROW);
+  return std::string {path, path + strlen(path) - strlen(name)};
 }
 
 inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
@@ -110,14 +103,18 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
 }
 
 
+
+
 class Authenticator {
 
 public:
 
 Authenticator(std::string username = "")
-: m_username(username) {
+: m_username(username),
+  m_authenticated(false)
+{
   if (m_username.empty()) {
-    INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
+    INIReader reader{std::string{get_dir() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
     if (reader.ParseError() < 0) {
       log("Error loading config");
@@ -134,7 +131,7 @@ Authenticator(std::string username = "")
     m_username = name;
   }
 
-  m_credentials_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
+  m_credentials_json = LoadJSONFile(get_dir() + "../" + constants::CONFIG_JSON_PATH);
   auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {
@@ -143,7 +140,7 @@ Authenticator(std::string username = "")
 
   m_credentials = credentials;
 
-  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::TOKEN_JSON_PATH);
+  m_token_json = LoadJSONFile(get_dir() + "../" + constants::TOKEN_JSON_PATH);
 
   if (
     m_token_json.contains("users")    &&
@@ -155,6 +152,7 @@ Authenticator(std::string username = "")
 
     if (auth.is_valid()) {
       m_auth = auth;
+      m_authenticated = true;
     }
   }
 }
@@ -195,6 +193,7 @@ bool FetchToken() {
 
       if (auth.is_valid()) {
         m_auth = auth;
+        m_authenticated = true;
         m_token_json["users"][m_username] = auth_json;
         SaveToFile(m_token_json.dump(), constants::TOKEN_JSON_PATH);
         return true;
