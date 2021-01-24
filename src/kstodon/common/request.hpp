@@ -53,8 +53,8 @@ inline std::string GetRequestError(cpr::ErrorCode code) {
                       return "GENERIC_SSL_ERROR";
   if (code == cpr::ErrorCode::UNSUPPORTED_PROTOCOL)
                       return "UNSUPPORTED_PROTOCOL";
-  if (code == cpr::ErrorCode::REQUEST_CANCELLED)
-                      return "REQUEST_CANCELLED";
+  // if (code == cpr::ErrorCode::REQUEST_CANCELLED)
+  //                     return "REQUEST_CANCELLED";
   return "UNKNOWN_ERROR";
 }
 
