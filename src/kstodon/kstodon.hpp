@@ -18,6 +18,12 @@ namespace kstodon {
   └───────────────────────────────────────────────────────────┘
 */
 
+class SecureClient {
+public:
+virtual ~SecureClient() {}
+virtual bool has_auth() = 0;
+};
+
 /**
   @class
   ┌───────────────────────────────────────────────────────────┐
@@ -25,9 +31,16 @@ namespace kstodon {
   └───────────────────────────────────────────────────────────┘
 */
 
-class Client {
+class Client : public SecureClient {
 public:
 Client();
+
+virtual ~Client() override {}
+
+virtual bool has_auth() override;
+
+private:
+Authenticator m_authenticator;
 };
 
 } // namespace kstodon
