@@ -3,6 +3,62 @@
 namespace kstodon {
 using namespace constants::MastodonOnline;
 
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░ Helper FNs ░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
+
+/**
+ * @brief Chunk Message
+ *
+ * @param   [in]  {std::string} message
+ * @returns [out] {std::vector<std::string>}
+ */
+std::vector<std::string> ChunkMessage(const std::string& message) {
+  using namespace constants;
+
+  const uint32_t MAX_CHUNK_SIZE = MASTODON_CHAR_LIMIT - 6;
+
+  std::vector<std::string>     chunks{};
+  const std::string::size_type message_size = message.size();
+  const std::string::size_type num_of_chunks{message.size() / MAX_CHUNK_SIZE + 1};
+  uint32_t                     chunk_index{1};
+  std::string::size_type       bytes_chunked{0};
+
+  chunks.reserve(num_of_chunks);
+
+  while (bytes_chunked < message_size) {
+    const std::string::size_type size_to_chunk =
+      (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
+      (message_size - bytes_chunked) :
+      MAX_CHUNK_SIZE;
+
+    std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
+
+    const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ") + 1;
+    const std::string::size_type pd_idx = oversized_chunk.find_last_of(".") + 1;
+    const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
+
+    chunks.emplace_back(
+      std::string{
+        oversized_chunk.substr(0, index) + '\n' +
+        std::to_string(chunk_index++)    + '/'  + std::to_string(num_of_chunks) // i/n
+      }
+    );
+
+    bytes_chunked += index;
+  }
+
+  return chunks;
+}
+
+
+/**
+ * @brief Construct a new Client:: Client object
+ *
+ * @param username
+ */
 Client::Client(const std::string& username)
 : m_authenticator(Authenticator{username}) {
   if (!m_authenticator.HasValidToken()) {
@@ -17,7 +73,12 @@ bool Client::HasAuth() {
   return m_authenticator.IsAuthenticated();
 }
 
-
+/**
+ * @brief
+ *
+ * @param id
+ * @return Status
+ */
 Status Client::FetchStatus(uint64_t id) {
   using json = nlohmann::json;
 
@@ -41,6 +102,12 @@ Status Client::FetchStatus(uint64_t id) {
   return Status{};
 }
 
+/**
+ * @brief
+ *
+ * @param id
+ * @return std::vector<Status>
+ */
 std::vector<Status> Client::FetchUserStatuses(UserID id) {
   using json = nlohmann::json;
   // api/v1/accounts/:id/statuses
@@ -55,51 +122,32 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
   }
 
   return std::vector<Status>{};
-
 }
 
 /**
- * @brief Chunk Message
+ * @brief PostMedia
  *
- * @param   [in]  {std::string} message
- * @returns [out] {std::vector<std::string>}
+ * @param   [in]  {File}  file
+ * @returns [out] {Media}
  */
-std::vector<std::string> ChunkMessage(const std::string& message) {
+Media Client::PostMedia(File file) {
   using namespace constants;
 
-  const uint32_t MAX_CHUNK_SIZE = MASTODON_CHAR_LIMIT - 5;
+  const std::string URL{BASE_URL + PATH.at(MEDIA_INDEX)};
 
-  std::vector<std::string>     chunks{};
-  const std::string::size_type message_size = message.size();
-  const std::string::size_type num_of_chunks{message.size() / MAX_CHUNK_SIZE + 1};
-  uint32_t                     chunk_index{1};
-  std::string::size_type       bytes_chunked{0};
+  cpr::Response r = cpr::Post(
+    cpr::Url{URL},
+    cpr::Header{
+      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
+    },
+    file.multiformdata()
+  );
 
-  chunks.reserve(num_of_chunks);
-
-  while (bytes_chunked < message_size) {
-    const std::string::size_type size_to_chunk =
-      (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
-      (message_size - bytes_chunked) :
-      MAX_CHUNK_SIZE;
-
-    std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
-
-    const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ");
-    const std::string::size_type pd_idx = oversized_chunk.find_last_of(".");
-    const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
-
-    chunks.emplace_back(
-      std::string{
-        oversized_chunk.substr(0, index) +
-        std::to_string(chunk_index++) + '/' + std::to_string(num_of_chunks) // i/n
-      }
-    );
-
-    bytes_chunked += index;
+  if (r.status_code < 400) {
+    return ParseMediaFromJSON(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
   }
 
-  return chunks;
+  return Media{};
 }
 
 /**
@@ -144,26 +192,14 @@ bool Client::PostStatus(Status status) {
   return true;
 }
 
-Media Client::PostMedia(File file) {
-  using namespace constants;
-
-  const std::string URL{BASE_URL + PATH.at(MEDIA_INDEX)};
-
-  cpr::Response r = cpr::Post(
-    cpr::Url{URL},
-    cpr::Header{
-      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
-    },
-    file.multiformdata()
-  );
-
-  if (r.status_code < 400) {
-    return ParseMediaFromJSON(json::parse(r.text, nullptr, constants::JSON_PARSE_NO_THROW));
-  }
-
-  return Media{};
-}
-
+/**
+ * @brief
+ *
+ * @param status
+ * @param files
+ * @return true
+ * @return false
+ */
 bool Client::PostStatus(Status status, std::vector<File> files) {
   for (const auto& file : files) {
     Media media = PostMedia(file);
@@ -172,6 +208,11 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
   return PostStatus(status);
 }
 
+/**
+ * @brief
+ *
+ * @return std::vector<Conversation>
+ */
 std::vector<Conversation> Client::FetchConversations() {
   using namespace constants;
 
@@ -191,10 +232,20 @@ std::vector<Conversation> Client::FetchConversations() {
   return JSONToConversation(response.json());
 }
 
+/**
+ * @brief
+ *
+ * @return Account
+ */
 Account Client::GetAccount() {
   return m_authenticator.GetAccount();
 }
 
+/**
+ * @brief
+ *
+ * @return std::string
+ */
 std::string Client::GetUsername() {
   return m_authenticator.GetUsername();
 }
