@@ -59,34 +59,89 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 }
 
 /**
+ * @brief Chunk Message
+ *
+ * @param   [in]  {std::string} message
+ * @returns [out] {std::vector<std::string>}
+ */
+std::vector<std::string> ChunkMessage(const std::string& message) {
+  using namespace constants;
+
+  const uint32_t MAX_CHUNK_SIZE = MASTODON_CHAR_LIMIT - 5;
+
+  std::vector<std::string>     chunks{};
+  const std::string::size_type message_size = message.size();
+  const std::string::size_type num_of_chunks{message.size() / MAX_CHUNK_SIZE + 1};
+  uint32_t                     chunk_index{1};
+  std::string::size_type       bytes_chunked{0};
+
+  chunks.reserve(num_of_chunks);
+
+  while (bytes_chunked < message_size) {
+    const std::string::size_type size_to_chunk =
+      (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
+      (message_size - bytes_chunked) :
+      MAX_CHUNK_SIZE;
+
+    std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
+
+    const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ");
+    const std::string::size_type pd_idx = oversized_chunk.find_last_of(".");
+    const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
+
+    chunks.emplace_back(
+      std::string{
+        oversized_chunk.substr(0, index) +
+        std::to_string(chunk_index++) + '/' + std::to_string(num_of_chunks) // i/n
+      }
+    );
+
+    bytes_chunked += index;
+  }
+
+  return chunks;
+}
+
+/**
  * PostStatus
  *
- * TODO: return Status object (updated)
+ * TODO: considering returning Status object (updated)
  *
- * @param status
- * @return true
- * @return false
+ * @param   [in]  {Status} status
+ * @returns [out] {bool}
  */
 bool Client::PostStatus(Status status) {
   using namespace constants;
   using json = nlohmann::json;
 
   const std::string URL = BASE_URL + PATH.at(STATUSES_INDEX);
+  const std::vector<std::string> messages = ChunkMessage(status.content);
+  std::string reply_to_id = status.replying_to_id;
 
-  cpr::Response r = cpr::Post(
-    cpr::Url{URL},
-    cpr::Header{
-      {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
-    },
-    cpr::Body{status.postdata()}
-  );
-  std::cout << r.text << std::endl;
-  Status returned_status = JSONToStatus(json::parse(r.text, nullptr, JSON_PARSE_NO_THROW));
+  for (const auto& message : messages) {
+    Status outgoing_status = Status::create_instance_with_message(status, message, reply_to_id);
 
-  if (!returned_status.content.empty()) {
+    RequestResponse response{cpr::Post(
+      cpr::Url{URL},
+      cpr::Header{
+        {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
+      },
+      cpr::Body{outgoing_status.postdata()}
+    )};
+
+    if (response.error)
+      throw request_error(response.GetError());
+
+    Status returned_status = JSONToStatus(response.json());
+
+    if (returned_status.content.empty())
+      return false;
+
     SaveStatusID(returned_status.id, m_authenticator.GetUsername());
+    reply_to_id = std::to_string(returned_status.id);
   }
-  return (r.status_code < 400);
+
+  return true;
 }
 
 Media Client::PostMedia(File file) {

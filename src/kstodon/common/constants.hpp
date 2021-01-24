@@ -12,8 +12,10 @@ const std::string TOKEN_JSON_PATH    {"config/token.json"};
 const std::string DB_JSON_PATH       {"config/db.json"};
 const std::string KSTODON_SECTION    {"kstodon"};
 const std::string USER_CONFIG_KEY    {"user"};
+const std::string DEFAULT_STATUS_MSG {"This is the response. Take it or leave it."};
 
-const uint8_t HEADER_AUTH_INDEX = 0x00;
+const uint32_t MASTODON_CHAR_LIMIT = 0x1F4;
+const uint8_t  HEADER_AUTH_INDEX   = 0x00;
 
 const std::vector<std::string> HEADER_NAMES{
 "Authorization"

@@ -284,6 +284,16 @@ Status()
 Status(std::string text)
 : sensitive(false), content(text) {}
 
+static Status create_instance_with_message(
+  Status             status,
+  const std::string& message,
+  const std::string& replying_to_id) {
+
+  status.content        = message;
+  status.replying_to_id = replying_to_id;
+  return status;
+}
+
 uint64_t                 id;
 std::string              created_at;
 std::string              replying_to_id;

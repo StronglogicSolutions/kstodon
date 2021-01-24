@@ -29,25 +29,41 @@ std::vector<Conversation> FindReplies() override {
     log(e.what());
   }
 
-  replies = ParseRepliesFromConversations(conversations, status_ids);
-
-  return replies;
+  return ParseRepliesFromConversations(conversations, status_ids);
 }
 
+/**
+ * @brief
+ *
+ * @param   [in]  {Status}            status
+ * @param   [in]  {std::vector<File>} files
+ * @returns [out] {bool}
+ */
 bool PostStatus(Status status, std::vector<File> files) {
   return m_client.PostStatus(status, files);
 }
 
-bool ReplyToStatus(Status status, std::string message = "This is the response. Take it or leave it.") {
+/**
+ * @brief ReplyTostatus
+ *
+ * @param   [in]  {Status}      status
+ * @param   [in]  {std::string} message
+ * @param   [in]  {bool}        remove_id
+ * @returns [out] {bool}
+ */
+bool ReplyToStatus(Status status, std::string message = constants::DEFAULT_STATUS_MSG, bool remove_id = true) {
   Status placeholder_response{};
   placeholder_response.replying_to_id = std::to_string(status.id);
   placeholder_response.content        = MakeMention(status) + message;
   placeholder_response.visibility     = status.visibility;
-  if (m_client.PostStatus(placeholder_response)) {
+
+  bool result = m_client.PostStatus(placeholder_response);
+
+  if (remove_id && result) {
     return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
   }
 
-  return false;
+  return result;
 }
 
 private:
