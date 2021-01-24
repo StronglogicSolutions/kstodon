@@ -15,7 +15,7 @@ using namespace constants::MastodonOnline;
  * @param   [in]  {std::string} message
  * @returns [out] {std::vector<std::string>}
  */
-std::vector<std::string> ChunkMessage(const std::string& message) {
+std::vector<std::string> const ChunkMessage(const std::string& message) {
   using namespace constants;
 
   const uint32_t MAX_CHUNK_SIZE = MASTODON_CHAR_LIMIT - 6;
@@ -26,28 +26,32 @@ std::vector<std::string> ChunkMessage(const std::string& message) {
   uint32_t                     chunk_index{1};
   std::string::size_type       bytes_chunked{0};
 
-  chunks.reserve(num_of_chunks);
+  if (num_of_chunks > 1) {
+    chunks.reserve(num_of_chunks);
 
-  while (bytes_chunked < message_size) {
-    const std::string::size_type size_to_chunk =
-      (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
-      (message_size - bytes_chunked) :
-      MAX_CHUNK_SIZE;
+    while (bytes_chunked < message_size) {
+      const std::string::size_type size_to_chunk =
+        (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
+        (message_size - bytes_chunked) :
+        MAX_CHUNK_SIZE;
 
-    std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
+      std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
 
-    const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ") + 1;
-    const std::string::size_type pd_idx = oversized_chunk.find_last_of(".") + 1;
-    const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
+      const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ") + 1;
+      const std::string::size_type pd_idx = oversized_chunk.find_last_of(".") + 1;
+      const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
 
-    chunks.emplace_back(
-      std::string{
-        oversized_chunk.substr(0, index) + '\n' +
-        std::to_string(chunk_index++)    + '/'  + std::to_string(num_of_chunks) // i/n
-      }
-    );
+      chunks.emplace_back(
+        std::string{
+          oversized_chunk.substr(0, index) + '\n' +
+          std::to_string(chunk_index++)    + '/'  + std::to_string(num_of_chunks) // i/n
+        }
+      );
 
-    bytes_chunked += index;
+      bytes_chunked += index;
+    }
+  } else {
+    chunks.emplace_back(message);
   }
 
   return chunks;
@@ -162,9 +166,9 @@ bool Client::PostStatus(Status status) {
   using namespace constants;
   using json = nlohmann::json;
 
-  const std::string URL = BASE_URL + PATH.at(STATUSES_INDEX);
+  const std::string              URL = BASE_URL + PATH.at(STATUSES_INDEX);
   const std::vector<std::string> messages = ChunkMessage(status.content);
-  std::string reply_to_id = status.replying_to_id;
+  std::string                    reply_to_id = status.replying_to_id;
 
   for (const auto& message : messages) {
     Status outgoing_status = Status::create_instance_with_message(status, message, reply_to_id);
