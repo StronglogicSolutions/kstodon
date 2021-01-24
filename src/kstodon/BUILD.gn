@@ -16,6 +16,12 @@ config("html") {
   ]
 }
 
+config("cpr") {
+  include_dirs = [
+    "//third_party/cpr/include"
+  ]
+}
+
 source_set("ini_reader") {
   sources = [
     "//third_party/inih/ini.c",
@@ -31,6 +37,7 @@ source_set("kstodon_sources") {
 
   public_configs = [
     ":inih",
+    ":cpr",
     ":json",
     ":html"
   ]

@@ -6,140 +6,13 @@
 #include <cpr/cpr.h>
 
 #include "kstodon/common/constants.hpp"
-#include "kstodon/common/util.hpp"
+#include "kstodon/common/types.hpp"
 
 inline const std::string get_executable_cwd() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
   return std::string{path, path + strlen(path) - strlen(name)};
 }
-
-struct AccountField {
-std::string name;
-std::string value;
-};
-
-struct Account {
-std::string               id;
-std::string               username;
-std::string               acct;
-std::string               display_name;
-std::string               locked;
-std::string               bot;
-std::string               discoverable;
-std::string               group;
-std::string               created_at;
-std::string               note;
-std::string               url;
-std::string               avatar;
-std::string               header;
-std::string               header_static;
-uint32_t                  followers_count;
-uint32_t                  following_count;
-uint32_t                  statuses_count;
-std::string               last_status_at;
-std::vector<AccountField> fields;
-
-friend std::ostream &operator<<(std::ostream& o, const Account& a) {
-  std::string fields{};
-  for (const auto& field : a.fields) fields += "Name: " + field.name + "\nValue: " + field.value;
-
-  o << "ID:           " << a.id              << "\n" <<
-       "Username:     " << a.username        << "\n" <<
-       "Account:      " << a.acct            << "\n" <<
-       "Display Name: " << a.display_name    << "\n" <<
-       "Locked:       " << a.locked          << "\n" <<
-       "Bot:          " << a.bot             << "\n" <<
-       "Discoverable: " << a.discoverable    << "\n" <<
-       "Group:        " << a.group           << "\n" <<
-       "Created:      " << a.created_at      << "\n" <<
-       "Note:         " << a.note            << "\n" <<
-       "URL:          " << a.url             << "\n" <<
-       "Avatar:       " << a.avatar          << "\n" <<
-       "Header:       " << a.header          << "\n" <<
-       "Followers:    " << a.followers_count << "\n" <<
-       "Following:    " << a.following_count << "\n" <<
-       "Statuses:     " << a.statuses_count  << "\n" <<
-       "Last Status:  " << a.last_status_at  << "\n" <<
-
-       "FIELDS\n"       << fields;
-
-  return o;
-}
-};
-
-inline Account ParseAccountFromJSON(nlohmann::json data) {
-  Account account{};
-  account.id              = SanitizeJSON(data["id"].dump());
-  account.username        = SanitizeJSON(data["username"].dump());
-  account.acct            = SanitizeJSON(data["acct"].dump());
-  account.display_name    = SanitizeJSON(data["display_name"].dump());
-  account.locked          = SanitizeJSON(data["locked"].dump());
-  account.bot             = SanitizeJSON(data["bot"].dump());
-  account.discoverable    = SanitizeJSON(data["discoverable"].dump());
-  account.group           = SanitizeJSON(data["group"].dump());
-  account.created_at      = SanitizeJSON(data["created_at"].dump());
-  account.note            = SanitizeJSON(data["note"].dump());
-  account.url             = SanitizeJSON(data["url"].dump());
-  account.avatar          = SanitizeJSON(data["avatar"].dump());
-  account.header          = SanitizeJSON(data["header"].dump());
-  account.followers_count = std::stoi(SanitizeJSON(data["followers_count"].dump()));
-  account.following_count = std::stoi(SanitizeJSON(data["following_count"].dump()));
-  account.statuses_count  = std::stoi(SanitizeJSON(data["statuses_count"].dump()));
-  account.last_status_at = SanitizeJSON(data["last_status_at"].dump());
-
-  nlohmann::json fields = data["source"]["fields"];
-
-  for (const auto& field : fields) {
-    account.fields.emplace_back(AccountField{
-      .name  = SanitizeJSON(field["name"].dump()),
-      .value = SanitizeJSON(field["value"].dump())
-    });
-  }
-
-  return account;
-}
-
-struct Credentials {
-std::string id;
-std::string name;
-std::string website;
-std::string redirect_uri;
-std::string scope;
-std::string client_id;
-std::string client_secret;
-std::string vapid_key;
-std::string code;
-
-bool is_valid() {
-  return
-    !id.empty() &&
-    !name.empty() &&
-    !website.empty() &&
-    !redirect_uri.empty() &&
-    !scope.empty() &&
-    !client_id.empty() &&
-    !client_secret.empty() &&
-    !vapid_key.empty() &&
-    !code.empty();
-}
-};
-
-struct Auth {
-std::string access_token;
-std::string token_type;
-std::string scope;
-std::string created_at;
-
-bool is_valid() {
-  return (
-    !access_token.empty() &&
-    !token_type.empty()   &&
-    !scope.empty()        &&
-    !created_at.empty()
-  );
-}
-};
 
 inline nlohmann::json LoadJSONFile(std::string path) {
   using namespace nlohmann;
@@ -162,21 +35,39 @@ inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
   );
 }
 
-inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file) {
+inline bool JSONHasUser(nlohmann::json data, std::string username) {
+  auto is_null = data.is_null();
+  auto is_obj  = data.is_object();
+  auto hasname = data.contains(username);
+
+  return (!data.is_null() && data.is_object() && data.contains(username));
+}
+
+inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username) {
   using json = nlohmann::json;
 
   Credentials creds{};
 
-  if (ValidateCredentialsJSON(json_file)) {
-    creds.id =            SanitizeJSON(json_file["id"].dump());
-    creds.name =          SanitizeJSON(json_file["name"].dump());
-    creds.website =       SanitizeJSON(json_file["website"].dump());
-    creds.redirect_uri =  SanitizeJSON(json_file["redirect_uri"].dump());
-    creds.scope        =  SanitizeJSON(json_file["scope"].dump());
-    creds.client_id =     SanitizeJSON(json_file["client_id"].dump());
-    creds.client_secret = SanitizeJSON(json_file["client_secret"].dump());
-    creds.vapid_key =     SanitizeJSON(json_file["vapid_key"].dump());
-    creds.code =          SanitizeJSON(json_file["code"].dump());
+  if (json_file.contains("users")) {
+    json users_json = json_file["users"];
+
+    if (
+      !users_json.is_null()            &&
+      JSONHasUser(users_json, username) &&
+      ValidateCredentialsJSON(users_json[username])) {
+
+      json user_json = users_json[username];
+
+      creds.id =            GetJSONStringValue(user_json, "id");
+      creds.name =          GetJSONStringValue(user_json, "name");
+      creds.website =       GetJSONStringValue(user_json, "website");
+      creds.redirect_uri =  GetJSONStringValue(user_json, "redirect_uri");
+      creds.scope        =  GetJSONStringValue(user_json, "scope");
+      creds.client_id =     GetJSONStringValue(user_json, "client_id");
+      creds.client_secret = GetJSONStringValue(user_json, "client_secret");
+      creds.vapid_key =     GetJSONStringValue(user_json, "vapid_key");
+      creds.code =          GetJSONStringValue(user_json, "code");
+    }
   }
 
   return creds;
@@ -209,10 +100,10 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
   Auth auth{};
 
   if (ValidateAuthJSON(json_file)) {
-    auth.access_token =  SanitizeJSON(json_file["access_token"].dump());
-    auth.token_type   =  SanitizeJSON(json_file["token_type"].dump());
-    auth.scope        =  SanitizeJSON(json_file["scope"].dump());
-    auth.created_at   =  SanitizeJSON(json_file["created_at"].dump());
+    auth.access_token =  GetJSONStringValue(json_file, "access_token");
+    auth.token_type   =  GetJSONStringValue(json_file, "token_type");
+    auth.scope        =  GetJSONStringValue(json_file, "scope");
+    auth.created_at   =  std::to_string(GetJSONValue<uint32_t>(json_file, "created_at"));
   }
 
   return auth;
@@ -223,15 +114,28 @@ class Authenticator {
 
 public:
 
-Authenticator() {
-  INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
+Authenticator(std::string username = "")
+: m_username(username) {
+  if (m_username.empty()) {
+    INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
-  if (reader.ParseError() < 0) {
-    log("Error loading config");
-    throw std::invalid_argument{"No configuration path"};
+    if (reader.ParseError() < 0) {
+      log("Error loading config");
+      throw std::invalid_argument{"No configuration path"};
+    }
+
+
+    auto name = reader.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
+
+    if (name.empty()) {
+      throw std::invalid_argument{"No username in config. Please provide a username"};
+    }
+
+    m_username = name;
   }
 
-  auto credentials = ParseCredentialsFromJSON(LoadJSONFile(constants::CONFIG_JSON_PATH));
+  m_credentials_json = LoadJSONFile(get_executable_cwd() + "../" + constants::CONFIG_JSON_PATH);
+  auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {
     throw std::invalid_argument{"Credentials not found"};
@@ -239,10 +143,19 @@ Authenticator() {
 
   m_credentials = credentials;
 
-  auto auth = ParseAuthFromJSON(LoadJSONFile(constants::TOKEN_JSON_PATH));
+  m_token_json = LoadJSONFile(get_executable_cwd() + "../" + constants::TOKEN_JSON_PATH);
 
-  if (auth.is_valid()) {
-    m_auth = auth;
+  if (
+    m_token_json.contains("users")    &&
+    !m_token_json["users"].is_null()  &&
+    m_token_json["users"].contains(m_username) &&
+    !m_token_json["users"][m_username].is_null()) {
+
+    auto auth = ParseAuthFromJSON(m_token_json["users"][m_username]);
+
+    if (auth.is_valid()) {
+      m_auth = auth;
+    }
   }
 }
 
@@ -282,7 +195,8 @@ bool FetchToken() {
 
       if (auth.is_valid()) {
         m_auth = auth;
-        SaveToFile(AuthToJSON(auth), constants::TOKEN_JSON_PATH);
+        m_token_json["users"][m_username] = auth_json;
+        SaveToFile(m_token_json.dump(), constants::TOKEN_JSON_PATH);
         return true;
       } else {
         log("Failed to parse token");
@@ -364,11 +278,21 @@ Account GetAccount() {
   return m_account;
 }
 
+std::string GetUsername() {
+  return m_username;
+}
+
 private:
+using json = nlohmann::json;
+
 Credentials  m_credentials;
 Auth         m_auth;
 Account      m_account;
+std::string  m_username;
 bool         m_authenticated;
+json         m_token_json;
+json         m_credentials_json;
+
 };
 
 #endif // __AUTH_HPP__

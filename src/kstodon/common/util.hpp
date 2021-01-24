@@ -19,6 +19,14 @@ inline void SaveToFile(std::string data, std::string path) {
 }
 
 /**
+ * SaveToFile
+ */
+inline void SaveToFile(nlohmann::json data, std::string path) {
+  std::ofstream o{path};
+  o << data;
+}
+
+/**
  * ReadFromFile
  */
 inline std::string ReadFromFile(std::string path) {
@@ -26,6 +34,18 @@ inline std::string ReadFromFile(std::string path) {
   std::stringstream fs{};
   fs << f.rdbuf();
   return fs.str();
+}
+
+/**
+ * ReadBytesFromFile
+ *
+ * @param path
+ * @return std::vector<uint8_t>
+ */
+inline std::vector<uint8_t> ReadBytesFromFile(std::string path) {
+  std::string file = ReadFromFile(path);
+
+  return std::vector<uint8_t>{file.begin(), file.end()};
 }
 
 /**
