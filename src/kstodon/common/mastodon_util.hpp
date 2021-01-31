@@ -319,12 +319,20 @@ inline std::string PlatformFromURL(const std::string& url) {
  *   </a>
  * </span>
  *
+ * For example:
+ *
+ * "<span class=\"h-card\">"
+ * "  <a href=\"" + status.account.url + "/@" + status.account.username + "\" class=\"u-url mention\">"
+ * "    @" + status.account.username + '@' + PlatformFromURL(status.account.url) +
+ * "  </a>"
+ * "</span>"
+ *
  * @param status
  * @return std::string
  */
 inline std::string MakeMention(const Status& status) {
   if (!status.account.username.empty() && !status.account.url.empty()) {
-    return '@' + status.account.username + '@' + PlatformFromURL(status.account.url);
+    return '@' + status.account.username + '@' + PlatformFromURL(status.account.url) + ' ';
   }
   return "";
 }

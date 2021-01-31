@@ -1,5 +1,4 @@
-#ifndef __BOT_HPP__
-#define __BOT_HPP__
+#pragma once
 
 #include "kstodon/client/client.hpp"
 
@@ -40,11 +39,6 @@ std::vector<Conversation> FindReplies() override {
   return ParseRepliesFromConversations(conversations, status_ids);
 }
 
-bool Reply(Status status) {
-  if (m_rep_fn_ptr != nullptr)
-    return PostStatus(m_rep_fn_ptr(status));
-  return false;
-}
 
 /**
  * @brief
@@ -70,17 +64,26 @@ bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<
  * @param   [in]  {bool}        remove_id
  * @returns [out] {bool}
  */
-bool ReplyToStatus(Status status, std::string message = constants::DEFAULT_STATUS_MSG, bool remove_id = true) {
-  Status placeholder_response{};
-  placeholder_response.replying_to_id = std::to_string(status.id);
-  placeholder_response.content        = MakeMention(status) + message;
-  placeholder_response.visibility     = status.visibility;
+bool ReplyToStatus(Status status, std::string message = "", bool remove_id = true)
+{
+  Status reply;
 
-  bool result = m_client.PostStatus(placeholder_response);
-
-  if (remove_id && result) {
-    return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
+  if (message.empty())
+    reply = m_rep_fn_ptr(status);
+  else
+  {
+    reply = Status{};
+    reply.content = message;
   }
+
+  reply.replying_to_id = std::to_string(status.id);
+  reply.content        = MakeMention(status) + reply.content;
+  reply.visibility     = status.visibility;
+
+  bool result = m_client.PostStatus(reply);
+
+  if (remove_id && result)
+    return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
 
   return result;
 }
@@ -92,5 +95,3 @@ ReplyFunction    m_rep_fn_ptr;
 };
 
 } // namespace kstodon
-
-#endif // __BOT_HPP__
