@@ -1,4 +1,4 @@
-#include "kstodon/kstodon.hpp"
+#include "kstodon/config.hpp"
 
 namespace technews {
 const std::string NAME{"technews"};
@@ -8,7 +8,8 @@ const std::string NAME{"technews"};
  *
  * @returns [out] {Status}
  */
-Status GenerateStatus() {
+Status GenerateStatus()
+{
   Status status{};
   status.content = "Excited to bring you news";
 
@@ -23,7 +24,8 @@ Status GenerateStatus() {
  * @param   [in]  {Status} received_status
  * @returns [out] {Status}
  */
-Status ReplyToStatus(Status received_status) {
+Status ReplyToStatus(Status received_status)
+{
   return GenerateStatus();
 }
 
@@ -47,10 +49,18 @@ int main(int argc, char** argv)
     rep_status_fn_ptr
   };
 
-  for (const auto& conversation : bot.FindReplies())
-    bot.Reply(conversation.status);
+  kstodon::BotStats stats{};
 
-  bot.PostStatus(); // Calling with no parameter invokes our GenerateStatus function
+  for (const auto& conversation : bot.FindReplies())
+  {
+    stats.rx_msg++;
+    (bot.ReplyToStatus(conversation.status)) ?  stats.tx_msg++ : stats.tx_err++;
+  }
+
+  (bot.PostStatus()) ?                // Calling with no parameter invokes our GenerateStatus function
+    stats.tx_msg++ : stats.tx_err++;
+
+  log(stats.to_string());
 
   return 0;
 }
