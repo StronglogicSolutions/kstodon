@@ -28,12 +28,15 @@ Status ReplyToStatus(Status received_status)
 {
   using namespace conversation;
 
-  std::vector<Token> tokens = SplitTokens(received_status.content);
+  std::vector<Token> tokens = SplitTokens(TokenizeText(received_status.content));
 
   Status status{};
 
   if (!tokens.empty())
-    for (const Token& token : tokens) status.content += "You mentioned: " + token.value + "\n";
+  {
+    status.content += "You mentioned: ";
+    for (const Token& token : tokens) status.content += token.value + '(' + TOKEN_TYPES.at(token.type) + '\n';
+  }
   else
     status.content += "Got a story for me?";
 
@@ -68,8 +71,8 @@ int main(int argc, char** argv)
     (bot.ReplyToStatus(conversation.status)) ?  stats.tx_msg++ : stats.tx_err++;
   }
 
-  (bot.PostStatus()) ?                // Calling with no parameter invokes our GenerateStatus function
-    stats.tx_msg++ : stats.tx_err++;
+  // (bot.PostStatus()) ?                // Calling with no parameter invokes our GenerateStatus function
+  //   stats.tx_msg++ : stats.tx_err++;
 
   log(stats.to_string());
 
