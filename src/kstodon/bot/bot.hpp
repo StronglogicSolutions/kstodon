@@ -48,7 +48,6 @@ std::vector<Conversation> FindReplies() override {
  * @returns [out] {bool}
  */
 bool PostStatus(Status status, std::vector<File> files) {
-  status.visibility = constants::StatusVisibility::PRIVATE;
   return m_client.PostStatus(status, files);
 }
 
