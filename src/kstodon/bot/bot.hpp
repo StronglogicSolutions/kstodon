@@ -4,12 +4,20 @@
 #include "kstodon/client/client.hpp"
 
 namespace kstodon {
+
+using GenerateFunction = Status(*)();
+using ReplyFunction    = Status(*)(Status status);
+
 class Bot : public ConversationTracker {
 
 public:
-Bot(const std::string& username = "")
-: m_client(Client{
-  username
+Bot(const std::string& username = "",
+    GenerateFunction gen_fn_ptr = nullptr,
+    ReplyFunction    rep_fn_ptr = nullptr)
+: m_gen_fn_ptr(gen_fn_ptr),
+  m_rep_fn_ptr(rep_fn_ptr),
+  m_client(Client{
+    username
   })
 {
   if (!m_client.HasAuth()) {
@@ -40,6 +48,7 @@ std::vector<Conversation> FindReplies() override {
  * @returns [out] {bool}
  */
 bool PostStatus(Status status, std::vector<File> files) {
+  status.visibility = constants::StatusVisibility::PRIVATE;
   return m_client.PostStatus(status, files);
 }
 
@@ -67,7 +76,9 @@ bool ReplyToStatus(Status status, std::string message = constants::DEFAULT_STATU
 }
 
 private:
-Client m_client;
+Client           m_client;
+GenerateFunction m_gen_fn_ptr;
+ReplyFunction    m_rep_fn_ptr;
 };
 
 } // namespace kstodon
