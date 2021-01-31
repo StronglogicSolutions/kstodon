@@ -53,7 +53,28 @@ source_set("kstodon_sources") {
   ]
 
   sources = [
-    "//src/kstodon/client/client.cpp",
+    "//src/kstodon/client/client.cpp"
   ]
 }
 
+executable("kstodon") {
+  deps = [
+    ":kstodon_sources"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  libs = [
+    "pthread",
+    "crypto",
+    "cpr",
+    "curl"
+  ]
+
+  sources = [
+    "//src/kstodon/main.cpp"
+  ]
+}

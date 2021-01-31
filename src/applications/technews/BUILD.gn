@@ -1,0 +1,80 @@
+# config("inih") {
+#   include_dirs = [
+#     "//third_party/inih/cpp",
+#   ]
+# }
+
+# config("json") {
+#   include_dirs = [
+#     "//third_party/json/include",
+#   ]
+# }
+
+# config("html") {
+#   include_dirs = [
+#     "//third_party/HtmlBuilder/include"
+#   ]
+# }
+
+# config("cpr") {
+#   include_dirs = [
+#     "//third_party/cpr/include"
+#   ]
+# }
+
+# source_set("ini_reader") {
+#   sources = [
+#     "//third_party/inih/ini.c",
+#     "//third_party/inih/cpp/INIReader.cpp",
+#   ]
+# }
+
+# source_set("kstodon_sources") {
+
+#   deps = [
+#     ":ini_reader"
+#   ]
+
+#   public_configs = [
+#     ":inih",
+#     ":cpr",
+#     ":json",
+#     ":html"
+#   ]
+
+#   include_dirs = [
+#     "//src",
+#   ]
+
+#   libs = [
+#     "crypto",
+#     "cpr",
+#     "curl",
+#   ]
+
+#   sources = [
+#     "//src/kstodon/client/client.cpp"
+#   ]
+# }
+
+executable("technews") {
+  public_deps = [
+    "//src/kstodon:kstodon_sources"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  # libs = [
+  #   "pthread",
+  #   "crypto",
+  #   "cpr",
+  #   "curl"
+  # ]
+
+  sources = [
+    "//src/applications/technews/main.cpp"
+  ]
+}

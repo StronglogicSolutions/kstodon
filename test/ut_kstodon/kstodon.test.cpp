@@ -5,7 +5,7 @@ TEST(KStodonTests, DISABLED_Instantiate) {
   ASSERT_NO_THROW(kstodon::Client{});
 }
 
-TEST(KStodonTests, DISABLED_FetchAuthToken) {
+TEST(KStodonTests, FetchAuthToken) {
   using namespace kstodon;
 
   Authenticator authenticator{};
@@ -130,7 +130,7 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
 }
 
 
-TEST(KStodonTests, FindAndReply) {
+TEST(KStodonTests, DISABLED_FindAndReply) {
   using namespace kstodon;
 
   Bot bot{};

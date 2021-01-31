@@ -47,8 +47,13 @@ std::vector<Conversation> FindReplies() override {
  * @param   [in]  {std::vector<File>} files
  * @returns [out] {bool}
  */
-bool PostStatus(Status status, std::vector<File> files) {
-  return m_client.PostStatus(status, files);
+bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<File>{}) {
+  return m_client.PostStatus(
+    status.is_valid() ?
+      status :
+      m_gen_fn_ptr(),
+    files
+  );
 }
 
 /**

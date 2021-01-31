@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "kstodon/kstodon.hpp"
+#include "kstodon.hpp"
 
 namespace kstodon {
 struct ExecuteConfig {
