@@ -26,7 +26,18 @@ Status GenerateStatus()
  */
 Status ReplyToStatus(Status received_status)
 {
-  return GenerateStatus();
+  using namespace conversation;
+
+  std::vector<Token> tokens = SplitTokens(received_status.content);
+
+  Status status{};
+
+  if (!tokens.empty())
+    for (const Token& token : tokens) status.content += "You mentioned: " + token.value + "\n";
+  else
+    status.content += "Got a story for me?";
+
+  return status;
 }
 
 }

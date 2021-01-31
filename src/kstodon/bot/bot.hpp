@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kstodon/client/client.hpp"
+#include <nlp.hpp>
 
 namespace kstodon {
 
