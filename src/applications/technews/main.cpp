@@ -47,6 +47,9 @@ int main(int argc, char** argv)
     rep_status_fn_ptr
   };
 
+  for (const auto& conversation : bot.FindReplies())
+    bot.Reply(conversation.status);
+
   bot.PostStatus(); // Calling with no parameter invokes our GenerateStatus function
 
   return 0;

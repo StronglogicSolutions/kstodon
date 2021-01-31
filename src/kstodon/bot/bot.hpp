@@ -40,6 +40,12 @@ std::vector<Conversation> FindReplies() override {
   return ParseRepliesFromConversations(conversations, status_ids);
 }
 
+bool Reply(Status status) {
+  if (m_rep_fn_ptr != nullptr)
+    return PostStatus(m_rep_fn_ptr(status));
+  return false;
+}
+
 /**
  * @brief
  *
