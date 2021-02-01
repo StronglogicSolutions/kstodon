@@ -5,7 +5,7 @@ TEST(KStodonTests, DISABLED_Instantiate) {
   ASSERT_NO_THROW(kstodon::Client{});
 }
 
-TEST(KStodonTests, FetchAuthToken) {
+TEST(KStodonTests, DISABLED_FetchAuthToken) {
   using namespace kstodon;
 
   Authenticator authenticator{};
@@ -143,4 +143,18 @@ TEST(KStodonTests, DISABLED_FindAndReply) {
   }
 
   EXPECT_FALSE(replies.empty());
+}
+
+TEST(KStodonTests, GetChildren) {
+  using namespace kstodon;
+
+  Client client{};
+
+  auto statuses = client.FetchChildStatuses(105652931846646786);
+
+  for (const auto& status : statuses) {
+    log(status);
+  }
+
+  EXPECT_FALSE(statuses.empty());
 }
