@@ -40,6 +40,26 @@ std::vector<Conversation> FindReplies() override {
   return ParseRepliesFromConversations(conversations, status_ids);
 }
 
+std::vector<Status> FindComments() override {
+  std::vector<Status> comments{};
+
+  for (const auto& id : GetSavedStatusIDs(m_client.GetUsername())) {
+    try {
+      std::vector<Status> replies = m_client.FetchChildStatuses(id);
+      comments.insert(
+        comments.end(),
+        std::make_move_iterator(replies.begin()),
+        std::make_move_iterator(replies.end())
+      );
+    }
+    catch (const request_error& e) {
+      log(e.what());
+    }
+  }
+
+  return comments;
+}
+
 
 /**
  * @brief
@@ -81,12 +101,13 @@ bool ReplyToStatus(Status status, std::string message = "", bool remove_id = tru
   reply.content        = MakeMention(status) + reply.content;
   reply.visibility     = status.visibility;
 
-  bool result = m_client.PostStatus(reply);
+  if (m_client.PostStatus(reply))
+  {
+    RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
+    return true;
+  }
 
-  if (remove_id && result)
-    return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
-
-  return result;
+  return false;
 }
 
 private:

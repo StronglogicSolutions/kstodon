@@ -37,7 +37,8 @@ virtual bool  PostStatus(Status status, std::vector<File> media) = 0;
 class ConversationTracker {
 public:
 virtual ~ConversationTracker() {}
-virtual std::vector<Conversation> FindReplies() = 0;
+virtual std::vector<Conversation> FindReplies()  = 0;
+virtual std::vector<Status> FindComments() = 0;
 };
 
 } // namespace kstodon

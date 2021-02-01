@@ -7,6 +7,15 @@
   │░░░░░░░░░░░░░░░░░░░░░░░░░ HelperFns ░░░░░░░░░░░░░░░░░░░░░░░│
   └───────────────────────────────────────────────────────────┘
 */
+
+inline std::string GetConfigPath() {
+  return get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH;
+}
+
+inline INIReader GetConfigReader() {
+  return INIReader{GetConfigPath()};
+}
+
 inline bool SaveStatusID(uint64_t status_id, std::string username) {
   using namespace nlohmann;
   json database_json;
@@ -252,14 +261,39 @@ inline Status JSONToStatus(nlohmann::json data) {
 
 inline std::vector<Status> JSONToStatuses(nlohmann::json data) {
   std::vector<Status> statuses{};
-
-  for (const auto& status_data : data) {
-    statuses.emplace_back(JSONToStatus(status_data));
-  }
+  if (!data.is_null() && data.is_array())
+    for (const auto& status_data : data)
+    {
+      Status status = JSONToStatus(status_data);
+      if (status.is_valid())
+        statuses.emplace_back(status);
+    }
 
   return statuses;
 }
 
+
+inline std::vector<Status> JSONContextToStatuses(nlohmann::json data) {
+  std::vector<Status> statuses{};
+  std::string s = data.dump();
+
+  try {
+    for (const auto& context : data) {
+      auto new_statuses = JSONToStatuses(context);
+      statuses.insert(
+        statuses.end(),
+        std::make_move_iterator(new_statuses.begin()),
+        std::make_move_iterator(new_statuses.end())
+      );
+    }
+  }
+  catch (const std::exception& e) {
+    std::string error = e.what();
+    log(error);
+  }
+
+  return statuses;
+}
 inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
   std::vector<Conversation> conversations{};
 
