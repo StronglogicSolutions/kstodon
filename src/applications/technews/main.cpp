@@ -19,10 +19,19 @@ nlohmann::json GetNewsJSON() {
     response.json() : nlohmann::json{};
 }
 
+/**
+ * @brief Get a trending tech news URL
+ *
+ * @returns [out] {std::string}
+ */
 std::string GetNews() {
   nlohmann::json news_json = GetNewsJSON();
 
-  if (!news_json.is_null() && news_json.is_object() && news_json.contains("articles") && !news_json["articles"].is_null()) {
+  if (!news_json.is_null()            &&
+       news_json.is_object()          &&
+       news_json.contains("articles") &&
+      !news_json["articles"].is_null())
+  {
     return news_json["articles"].front()["url"];
   }
 
