@@ -3,7 +3,7 @@
 #include "kstodon/config.hpp"
 
 namespace technews {
-const std::string NAME   {"technews"};
+const std::string NAME   {"koreannews"};
 const std::string SOURCES{"hacker-news,ars-technica,"
                           "crypto-coins-news,"
                           "recode,techradar,"
@@ -14,11 +14,11 @@ const std::string DB_PATH{"src/applications/technews/posts.json"};
  * Helper Functions
  */
 std::string GetAPIKey() {
-  return GetConfigReader().GetString(constants::TECH_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
+  return GetConfigReader().GetString(constants::KOREAN_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
 }
 
 std::string GetURL() {
-  return "https://newsapi.org/v2/top-headlines?sources=" + SOURCES + "&apiKey=" + GetAPIKey();
+  return "http://newsapi.org/v2/top-headlines?country=kr&apiKey=" + GetAPIKey();
 }
 
 nlohmann::json GetDatabase() {

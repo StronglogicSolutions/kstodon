@@ -12,6 +12,7 @@ const std::string TOKEN_JSON_PATH    {"config/token.json"};
 const std::string DB_JSON_PATH       {"config/db.json"};
 const std::string KSTODON_SECTION    {"kstodon"};
 const std::string TECH_NEWS_SECTION  {"technews"};
+const std::string KOREAN_NEWS_SECTION{"koreannews"};
 const std::string USER_CONFIG_KEY    {"user"};
 const std::string NEWSAPI_CONFIG_KEY {"news_api"};
 const std::string DEFAULT_STATUS_MSG {"This is the response. Take it or leave it."};

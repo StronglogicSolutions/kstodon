@@ -4,7 +4,8 @@ all_tests = [
 
 all_executables = [
   "//src/kstodon",
-  "//src/applications/technews"
+  "//src/applications/technews",
+  "//src/applications/koreannews"
 ]
 
 group ("executables") {
