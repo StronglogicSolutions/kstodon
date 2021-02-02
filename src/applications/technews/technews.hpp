@@ -5,7 +5,7 @@
 namespace technews {
 const std::string NAME   {"technews"};
 const std::string SOURCES{"hacker-news,ars-technica,"
-                          "crypto-coins-news,engadget,"
+                          "crypto-coins-news,"
                           "recode,techcrunch,techradar,"
                           "the-next-web,wired"};
 const std::string DB_PATH{"src/applications/technews/posts.json"};
