@@ -42,6 +42,8 @@ std::vector<std::string> const ChunkMessage(const std::string& message) {
       const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
 
       chunks.emplace_back(
+        index == 0 ?
+        oversized_chunk :
         std::string{
           oversized_chunk.substr(0, index) + '\n' +
           std::to_string(chunk_index++)    + '/'  + std::to_string(num_of_chunks) // i/n
