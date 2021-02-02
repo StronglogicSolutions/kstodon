@@ -69,12 +69,19 @@ std::vector<Status> FindComments() override {
  * @returns [out] {bool}
  */
 bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<File>{}) {
-  return m_client.PostStatus(
-    status.is_valid() ?
-      status :
-      m_gen_fn_ptr(),
-    files
-  );
+  try {
+    return m_client.PostStatus(
+      status.is_valid() ?
+        status :
+        m_gen_fn_ptr(),
+      files
+    );
+  }
+  catch (const std::exception& e)
+  {
+    log(e.what());
+    return false;
+  }
 }
 
 /**
