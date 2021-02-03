@@ -9,6 +9,7 @@ const std::string SOURCES{"hacker-news,ars-technica,"
                           "recode,techradar,"
                           "the-next-web,wired"};
 const std::string DB_PATH{"src/applications/technews/posts.json"};
+const std::string HASHTAGS{"#KoreanNews #KSTYLEYO #KoreanLanguage #LearnKorean #KoreanStudy #KoreanLearning #Topik"};
 
 /**
  * Helper Functions
@@ -85,6 +86,7 @@ std::string GetNews() {
         technews::SavePostID(article["url"]);
         return std::string{
           article["title"].get<std::string>() + '\n' +
+          HASHTAGS                            + '\n' +
           article["url"].get<std::string>()
         };
       }
