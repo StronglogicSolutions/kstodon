@@ -3,12 +3,13 @@
 #include "kstodon/config.hpp"
 
 namespace technews {
-const std::string NAME   {"technews"};
+const std::string NAME   {"stronglogicsolutions"};
 const std::string SOURCES{"hacker-news,ars-technica,"
                           "crypto-coins-news,"
                           "recode,techradar,"
                           "the-next-web,wired"};
 const std::string DB_PATH{"src/applications/technews/posts.json"};
+const std::string HASHTAGS{"#StronglogicSolutions #TechNews #News #Technology"};
 
 /**
  * Helper Functions
@@ -85,6 +86,7 @@ std::string GetNews() {
         technews::SavePostID(article["url"]);
         return std::string{
           article["title"].get<std::string>() + '\n' +
+          HASHTAGS                            + '\n' +
           article["url"].get<std::string>()
         };
       }
