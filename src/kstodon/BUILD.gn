@@ -30,7 +30,7 @@ source_set("knlp_sources") {
 
 source_set("ini_reader") {
   sources = [
-    "//src/kstodon/common/ini.c ",
+    "//src/kstodon/common/ini.c",
     "//src/kstodon/common/INIReader.cpp"
   ]
 }

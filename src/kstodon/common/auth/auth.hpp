@@ -1,9 +1,9 @@
 #ifndef __AUTH_HPP__
 #define __AUTH_HPP__
 
-#include "kstodon/common/INIReader.h"
-#include "kstodon/common/request.hpp"
-#include "kstodon/common/mastodon_util.hpp"
+#include "../INIReader.h"
+#include "../request.hpp"
+#include "../mastodon_util.hpp"
 
 inline const std::string get_dir() {
   char* path = realpath("/proc/self/exe", NULL);
