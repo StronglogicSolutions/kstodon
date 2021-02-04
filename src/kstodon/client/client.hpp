@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kstodon/common/auth/auth.hpp"
-#include "kstodon/common/interface.hpp"
+#include "../common/auth/auth.hpp"
+#include "../common/interface.hpp"
 
 namespace kstodon {
 /**
