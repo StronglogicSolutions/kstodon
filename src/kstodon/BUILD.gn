@@ -1,9 +1,3 @@
-config("inih") {
-  include_dirs = [
-    "//third_party/inih/cpp",
-  ]
-}
-
 config("json") {
   include_dirs = [
     "//third_party/json/include",
@@ -36,8 +30,8 @@ source_set("knlp_sources") {
 
 source_set("ini_reader") {
   sources = [
-    "//third_party/inih/ini.c",
-    "//third_party/inih/cpp/INIReader.cpp",
+    "//src/kstodon/common/ini.c",
+    "//src/kstodon/common/INIReader.cpp"
   ]
 }
 
@@ -49,7 +43,7 @@ source_set("kstodon_sources") {
   ]
 
   public_configs = [
-    ":inih",
+    # ":inih",
     ":cpr",
     ":json",
     ":html",

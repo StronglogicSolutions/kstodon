@@ -1,8 +1,7 @@
 #ifndef __AUTH_HPP__
 #define __AUTH_HPP__
 
-#include <INIReader.h>
-
+#include "kstodon/common/INIReader.h"
 #include "kstodon/common/request.hpp"
 #include "kstodon/common/mastodon_util.hpp"
 
