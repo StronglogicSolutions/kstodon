@@ -126,11 +126,16 @@ Status ReplyToStatus(Status received_status)
 
   if (!tokens.empty())
   {
-    status.content += "\nYou mentioned:\n";
-    for (const Token& token : tokens) status.content += token.value + '(' + TOKEN_TYPES.at(token.type) + ")\n";
+    status.content += "\nI am down with";
+    std::string delim{};
+    for (const Token& token : tokens)
+    {
+      status.content += delim + token.value;
+      delim = " and ";
+    }
   }
   else
-    status.content += "Got a story for me?";
+    status.content += "Greetings from Stronglogic";
 
   return status;
 }
