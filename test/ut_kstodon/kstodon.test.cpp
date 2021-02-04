@@ -130,7 +130,7 @@ TEST(KStodonTests, DISABLED_PostStatusWithFile) {
 }
 
 
-TEST(KStodonTests, FindAndReply) {
+TEST(KStodonTests, DISABLED_FindAndReply) {
   using namespace kstodon;
 
   Bot bot{};
@@ -143,4 +143,18 @@ TEST(KStodonTests, FindAndReply) {
   }
 
   EXPECT_FALSE(replies.empty());
+}
+
+TEST(KStodonTests, GetChildren) {
+  using namespace kstodon;
+
+  Client client{};
+
+  auto statuses = client.FetchChildStatuses(105652931846646786);
+
+  for (const auto& status : statuses) {
+    log(status);
+  }
+
+  EXPECT_FALSE(statuses.empty());
 }

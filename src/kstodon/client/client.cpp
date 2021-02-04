@@ -42,6 +42,8 @@ std::vector<std::string> const ChunkMessage(const std::string& message) {
       const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
 
       chunks.emplace_back(
+        index == 0 ?
+        oversized_chunk :
         std::string{
           oversized_chunk.substr(0, index) + '\n' +
           std::to_string(chunk_index++)    + '/'  + std::to_string(num_of_chunks) // i/n
@@ -126,6 +128,27 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
   }
 
   return std::vector<Status>{};
+}
+
+/**
+ * @brief
+ *
+ * @param id
+ * @return std::vector<Status>
+ */
+std::vector<Status> Client::FetchChildStatuses(StatusID id) {
+  using json = nlohmann::json;
+  // api/v1/accounts/:id/statuses
+  const std::string URL = STATUS_CONTEXT_URL(BASE_URL, id);
+
+  RequestResponse response{cpr::Get(
+    cpr::Url{URL}
+  )};
+
+  if (response.error)
+    throw request_error{response.GetError()};
+
+  return JSONContextToStatuses(response.json());
 }
 
 /**

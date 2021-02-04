@@ -1,15 +1,23 @@
-#ifndef __BOT_HPP__
-#define __BOT_HPP__
+#pragma once
 
 #include "kstodon/client/client.hpp"
+#include <nlp.hpp>
 
 namespace kstodon {
+
+using GenerateFunction = Status(*)();
+using ReplyFunction    = Status(*)(Status status);
+
 class Bot : public ConversationTracker {
 
 public:
-Bot(const std::string& username = "")
-: m_client(Client{
-  username
+Bot(const std::string& username = "",
+    GenerateFunction gen_fn_ptr = nullptr,
+    ReplyFunction    rep_fn_ptr = nullptr)
+: m_gen_fn_ptr(gen_fn_ptr),
+  m_rep_fn_ptr(rep_fn_ptr),
+  m_client(Client{
+    username
   })
 {
   if (!m_client.HasAuth()) {
@@ -32,6 +40,27 @@ std::vector<Conversation> FindReplies() override {
   return ParseRepliesFromConversations(conversations, status_ids);
 }
 
+std::vector<Status> FindComments() override {
+  std::vector<Status> comments{};
+
+  for (const auto& id : GetSavedStatusIDs(m_client.GetUsername())) {
+    try {
+      std::vector<Status> replies = m_client.FetchChildStatuses(id);
+      comments.insert(
+        comments.end(),
+        std::make_move_iterator(replies.begin()),
+        std::make_move_iterator(replies.end())
+      );
+    }
+    catch (const request_error& e) {
+      log(e.what());
+    }
+  }
+
+  return comments;
+}
+
+
 /**
  * @brief
  *
@@ -39,8 +68,20 @@ std::vector<Conversation> FindReplies() override {
  * @param   [in]  {std::vector<File>} files
  * @returns [out] {bool}
  */
-bool PostStatus(Status status, std::vector<File> files) {
-  return m_client.PostStatus(status, files);
+bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<File>{}) {
+  try {
+    return m_client.PostStatus(
+      status.is_valid() ?
+        status :
+        m_gen_fn_ptr(),
+      files
+    );
+  }
+  catch (const std::exception& e)
+  {
+    log(e.what());
+    return false;
+  }
 }
 
 /**
@@ -51,25 +92,35 @@ bool PostStatus(Status status, std::vector<File> files) {
  * @param   [in]  {bool}        remove_id
  * @returns [out] {bool}
  */
-bool ReplyToStatus(Status status, std::string message = constants::DEFAULT_STATUS_MSG, bool remove_id = true) {
-  Status placeholder_response{};
-  placeholder_response.replying_to_id = std::to_string(status.id);
-  placeholder_response.content        = MakeMention(status) + message;
-  placeholder_response.visibility     = status.visibility;
+bool ReplyToStatus(Status status, std::string message = "", bool remove_id = true)
+{
+  Status reply;
 
-  bool result = m_client.PostStatus(placeholder_response);
-
-  if (remove_id && result) {
-    return RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
+  if (message.empty())
+    reply = m_rep_fn_ptr(status);
+  else
+  {
+    reply = Status{};
+    reply.content = message;
   }
 
-  return result;
+  reply.replying_to_id = std::to_string(status.id);
+  reply.content        = MakeMention(status) + reply.content;
+  reply.visibility     = status.visibility;
+
+  if (m_client.PostStatus(reply))
+  {
+    RemoveStatusID(m_client.GetUsername(), string_to_uint64(status.replying_to_id));
+    return true;
+  }
+
+  return false;
 }
 
 private:
-Client m_client;
+Client           m_client;
+GenerateFunction m_gen_fn_ptr;
+ReplyFunction    m_rep_fn_ptr;
 };
 
 } // namespace kstodon
-
-#endif // __BOT_HPP__

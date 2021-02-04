@@ -1,0 +1,13 @@
+executable("technews") {
+  public_deps = [
+    "//src/kstodon:kstodon_sources"
+  ]
+
+  include_dirs = [
+    "//src",
+  ]
+
+  sources = [
+    "//src/applications/technews/main.cpp"
+  ]
+}

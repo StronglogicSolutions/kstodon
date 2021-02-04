@@ -22,6 +22,7 @@ virtual ~Client() override {}
 virtual bool                HasAuth() override;
 virtual Status              FetchStatus(StatusID id) override;
 virtual std::vector<Status> FetchUserStatuses(UserID id) override;
+ std::vector<Status> FetchChildStatuses(StatusID id);
 virtual bool                PostStatus(Status status) override;
 virtual bool                PostStatus(Status status, std::vector<File> media) override;
 virtual Media               PostMedia(File file) override;

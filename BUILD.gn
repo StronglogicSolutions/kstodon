@@ -2,27 +2,14 @@ all_tests = [
   "//test/ut_kstodon",
 ]
 
-executable("kstodon") {
-  public_deps = [
-    "//src/kstodon:kstodon_sources"
-  ]
+all_executables = [
+  "//src/kstodon",
+  "//src/applications/technews",
+  "//src/applications/koreannews"
+]
 
-  include_dirs = [
-    "//src",
-    "//third_party/json/include",
-  ]
-
-  libs = [
-    "pthread",
-    "crypto",
-    "cpr",
-    "curl",
-  ]
-
-
-  sources = [
-    "//src/main.cpp",
-  ]
+group ("executables") {
+  deps = all_executables
 }
 
 group("tests") {
