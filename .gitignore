@@ -4,3 +4,4 @@ out
 config/*
 tags
 tokenized_message.txt
+**/posts.json
