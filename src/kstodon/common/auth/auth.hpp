@@ -1,7 +1,7 @@
 #ifndef __AUTH_HPP__
 #define __AUTH_HPP__
 
-#include "../INIReader.h"
+#include <INIReader.h>
 #include "../request.hpp"
 #include "../mastodon_util.hpp"
 
@@ -130,7 +130,7 @@ Authenticator(std::string username = "")
     m_username = name;
   }
 
-  m_credentials_json = LoadJSONFile(get_dir() + "../" + constants::CONFIG_JSON_PATH);
+  m_credentials_json = LoadJSONFile(get_dir() + constants::CONFIG_JSON_PATH);
   auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
 
   if (!credentials.is_valid()) {

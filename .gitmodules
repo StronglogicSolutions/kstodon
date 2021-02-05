@@ -13,3 +13,6 @@
 [submodule "third_party/knlp"]
 	path = third_party/knlp
 	url = git@github.com:/stronglogicsolutions/knlp.git
+[submodule "third_party/inih"]
+	path = third_party/inih
+	url = https://github.com/benhoyt/inih
