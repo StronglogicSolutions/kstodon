@@ -19,8 +19,6 @@ inline INIReader GetConfigReader() {
 inline bool SaveStatusID(uint64_t status_id, std::string username) {
   using namespace nlohmann;
   json database_json;
-  auto path = get_executable_cwd() + "../" + constants::DB_JSON_PATH;
-  std::cout << path << std::endl;
   json loaded_json = LoadJSONFile(get_executable_cwd() + "../" + constants::DB_JSON_PATH);
 
   if (loaded_json.is_discarded() || loaded_json.is_null())
