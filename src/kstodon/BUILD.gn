@@ -93,7 +93,7 @@ executable("kstodon") {
   ]
 }
 
-static_library("kstodon_lib") {
+shared_library("kstodon_lib") {
   deps = [
     ":kstodon_sources"
   ]
