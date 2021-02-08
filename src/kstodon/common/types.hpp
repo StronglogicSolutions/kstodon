@@ -44,6 +44,7 @@ struct File : public PostDataInterface {
 std::string path;
 std::string description;
 std::string thumbnail;
+std::string url;
 
 std::string GetBytes() {
   return ReadFromFile(path);
