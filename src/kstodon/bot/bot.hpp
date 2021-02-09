@@ -8,6 +8,11 @@ namespace kstodon {
 using GenerateFunction = Status(*)();
 using ReplyFunction    = Status(*)(Status status);
 
+inline std::vector<File> GetDefaultFilesArg()
+{
+  return std::vector<File>{};
+}
+
 class Bot : public ConversationTracker {
 
 public:
@@ -60,7 +65,6 @@ std::vector<Status> FindComments() override {
   return comments;
 }
 
-
 /**
  * @brief
  *
@@ -68,8 +72,12 @@ std::vector<Status> FindComments() override {
  * @param   [in]  {std::vector<File>} files
  * @returns [out] {bool}
  */
-bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<File>{}) {
+template <typename T = File>
+bool PostStatus(Status status = Status{}, std::vector<T> files = GetDefaultFilesArg()) {
   try {
+    if constexpr(
+      std::is_same_v<T, File> || std::is_same_v<T, std::string>
+    )
     return m_client.PostStatus(
       status.is_valid() ?
         status :
@@ -80,8 +88,8 @@ bool PostStatus(Status status = Status{}, std::vector<File> files = std::vector<
   catch (const std::exception& e)
   {
     log(e.what());
-    return false;
   }
+  return false;
 }
 
 /**

@@ -25,6 +25,7 @@ virtual std::vector<Status> FetchUserStatuses(UserID id) override;
  std::vector<Status> FetchChildStatuses(StatusID id);
 virtual bool                PostStatus(Status status) override;
 virtual bool                PostStatus(Status status, std::vector<File> media) override;
+        bool                PostStatus(Status status, std::vector<std::string> media);
 virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
         std::string         GetUsername();
