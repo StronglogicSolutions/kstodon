@@ -9,11 +9,11 @@
  */
 int main(int argc, char** argv)
 {
-  kstodon::GenerateFunction gen_status_fn_ptr = &technews::GenerateStatus;
-  kstodon::ReplyFunction    rep_status_fn_ptr = &technews::ReplyToStatus;
+  kstodon::GenerateFunction gen_status_fn_ptr = &koreannews::GenerateStatus;
+  kstodon::ReplyFunction    rep_status_fn_ptr = &koreannews::ReplyToStatus;
 
   kstodon::Bot bot{
-    technews::NAME,
+    koreannews::NAME,
     gen_status_fn_ptr,
     rep_status_fn_ptr
   };

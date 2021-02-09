@@ -1,13 +1,17 @@
+config("psql_config") {
+  include_dirs = ["//third_party/psql_orm/src"]
+
+  libs = [
+    "//third_party/psql_orm/libpsqlorm.a",
+    "/usr/local/lib/libpqxx.a",
+    "pq",
+    "pqxx"
+  ]
+}
+
 executable("koreannews") {
-  public_deps = [
-    "//src/kstodon:kstodon_sources"
-  ]
-
-  include_dirs = [
-    "//src",
-  ]
-
-  sources = [
-    "//src/applications/koreannews/main.cpp"
-  ]
+  public_deps    = ["//src/kstodon:kstodon_sources"]
+  public_configs = [":psql_config"]
+  include_dirs   = ["//src"]
+  sources        = ["//src/applications/koreannews/main.cpp"]
 }

@@ -2,13 +2,16 @@
 
 #include "kstodon/config.hpp"
 
-namespace technews {
+#include "psqlorm.hpp"
+
+namespace koreannews {
 const std::string NAME   {"koreannews"};
 const std::string SOURCES{"hacker-news,ars-technica,"
                           "crypto-coins-news,"
                           "recode,techradar,"
                           "the-next-web,wired"};
 const std::string DB_PATH{"src/applications/koreannews/posts.json"};
+const std::string DB_NAME{"posts"};
 const std::string HASHTAGS{"#KoreanNews #KSTYLEYO #KoreanLanguage #LearnKorean #KoreanStudy #KoreanLearning #Topik"};
 
 /**
@@ -22,37 +25,48 @@ std::string GetURL() {
   return "http://newsapi.org/v2/top-headlines?country=kr&apiKey=" + GetAPIKey();
 }
 
-nlohmann::json GetDatabase() {
-   return LoadJSONFile(DB_PATH);
+Database::PSQLORM GetDatabase() {
+  return Database::PSQLORM{
+    DatabaseConfiguration{
+      .credentials = DatabaseCredentials{
+        .user     = "knewsadmin",
+        .password = "knewsadmin",
+        .name     = "knews"
+      },
+      .address = "127.0.0.1",
+      .port    = "5432"
+    }
+  };
 }
 
-void SaveDatabase(nlohmann::json data) {
-  SaveToFile(data, DB_PATH);
+void SavePost(const std::string& url) {
+  using namespace Database;
+  PSQLORM db = GetDatabase();
+
+  if (!db.insert(DB_NAME, {"url"},{url}))
+    log("Could not save to database");
 }
 
-bool AlreadySaved(std::string id) {
-  auto db = GetDatabase();
+bool AlreadySaved(std::string url) {
+  using namespace Database;
+  PSQLORM db = GetDatabase();
 
-  if (db.is_discarded() || db.is_null() || !db.contains("posted"))
-    return false;
+  QueryValues values = db.select(
+    DB_NAME,
+    Fields{
+      "id"
+    },
+    QueryFilter{
+      {
+        "url", url
+      }
+    }
+  );
 
-  auto posted = db["posted"];
+  for (const auto& value : values)
+    log(value.first + " : " + value.second);
 
-  return std::find(posted.cbegin(), posted.cend(), id) != posted.cend();
-}
-
-void SavePostID(std::string id) {
-  auto db = GetDatabase();
-
-  if (db.is_discarded() || db.is_null())
-    db = {"posted", {id}};
-  else
-    if (!db.contains("posted"))
-      db["posted"] = {id};
-    else
-      db["posted"].emplace_back(id);
-
-  SaveDatabase(db);
+  return !values.empty();
 }
 
 
@@ -71,8 +85,9 @@ nlohmann::json GetNewsJSON() {
  * @returns [out] {std::string}
  */
 std::string GetNews() {
+  using namespace koreannews;
+
   nlohmann::json news_json = GetNewsJSON();
-  auto string = news_json.dump();
 
   if (!news_json.is_null()            &&
        news_json.is_object()          &&
@@ -81,9 +96,9 @@ std::string GetNews() {
   {
     for (const nlohmann::json& article : news_json["articles"])
     {
-      if (!technews::AlreadySaved(article["url"]))
+      if (!AlreadySaved(article["url"]))
       {
-        technews::SavePostID(article["url"]);
+        SavePost(article["url"]);
         return std::string{
           article["title"].get<std::string>() + '\n' +
           HASHTAGS                            + '\n' +
