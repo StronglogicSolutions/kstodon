@@ -6,20 +6,26 @@
 #include "kstodon.hpp"
 
 namespace kstodon {
+enum class Language {
+english = 0x00,
+korean = 0x01
+};
+
 struct ExecuteConfig {
 std::string              message;
 std::vector<std::string> file_paths;
 std::string              description;
 bool                     execute_bot;
 std::string              username;
+Language                 language = Language::korean;
 };
 
-ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
+inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
   ExecuteConfig config{};
 
   for (int i = 1; i < argc; i++) {
     std::string argument = SanitizeInput(argv[i]);
-    if (argument.find("--header") == 0){
+    if (argument.find("--header") == 0) {
       config.message = argument.substr(9);
       continue;
     }
@@ -42,6 +48,10 @@ ExecuteConfig ParseRuntimeArguments(int argc, char** argv) {
     if (argument.find("--execute_bot") == 0) {
       config.execute_bot = (argument.substr(14).compare("true") == 0);
       continue;
+    }
+    else
+    if (argument.find("--language") == 0) {
+      config.language = (argument.substr(11) == "english") ? Language::english : Language::korean;
     }
   }
 

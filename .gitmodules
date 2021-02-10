@@ -19,3 +19,6 @@
 [submodule "third_party/psql_orm"]
 	path = third_party/psql_orm
 	url = https://github.com/adventurist/psql_orm
+[submodule "third_party/tinyxml2"]
+	path = third_party/tinyxml2
+	url = https://github.com/leethomason/tinyxml2
