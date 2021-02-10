@@ -9,9 +9,21 @@ config("psql_config") {
   ]
 }
 
+config("xml") {
+  include_dirs = ["//third_party/tinyxml2"]
+}
+
+source_set("xml_sources") {
+  sources = ["//third_party/tinyxml2/tinyxml2.cpp"]
+}
+
 executable("koreannews") {
-  public_deps    = ["//src/kstodon:kstodon_sources"]
-  public_configs = [":psql_config"]
+  public_deps    = ["//src/kstodon:kstodon_sources", ":xml_sources"]
+  public_configs = [":psql_config", ":xml"]
   include_dirs   = ["//src"]
-  sources        = ["//src/applications/koreannews/main.cpp"]
+  sources        = [
+    "//src/applications/koreannews/main.cpp",
+    "//src/applications/koreannews/constants.cpp",
+    "//src/applications/koreannews/news.cpp"
+  ]
 }
