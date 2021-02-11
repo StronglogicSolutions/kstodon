@@ -104,6 +104,7 @@ Status GenerateStatus()
 {
   Status status{};
   status.content = GetNews();
+  status.visibility = "private";
 
   return status;
 }
