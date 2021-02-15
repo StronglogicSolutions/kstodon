@@ -1,8 +1,6 @@
-#ifndef __CONSTANTS_HPP__
-#define __CONSTANTS_HPP__
+#pragma once
 
 #include <string>
-
 
 namespace constants {
 const bool        JSON_PARSE_NO_THROW{false};
@@ -14,6 +12,8 @@ const std::string KSTODON_SECTION    {"kstodon"};
 const std::string TECH_NEWS_SECTION  {"technews"};
 const std::string KOREAN_NEWS_SECTION{"koreannews"};
 const std::string USER_CONFIG_KEY    {"user"};
+const std::string CREDS_PATH_KEY     {"credentials_path"};
+const std::string TOKENS_PATH_KEY    {"token_path"};
 const std::string NEWSAPI_CONFIG_KEY {"news_api"};
 const std::string DEFAULT_STATUS_MSG {"This is the response. Take it or leave it."};
 
@@ -51,5 +51,3 @@ inline const std::string STATUS_CONTEXT_URL(const std::string& base_url, uint64_
 
 } // namespace MastodonOnline
 } // namespace constants
-
-#endif // __CONSTANTS_HPP__
