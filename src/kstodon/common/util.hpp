@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <iomanip>
+#include <cstdio>
 #include <ctype.h>
 #include <chrono>
 #include <iostream>
@@ -28,7 +29,8 @@ inline void SaveToFile(std::string data, std::string path) {
 /**
  * SaveToFile
  */
-inline void SaveToFile(nlohmann::json data, std::string path) {
+template <typename T>
+inline void SaveToFile(T data, std::string path) {
   std::ofstream o{path};
   o << data;
 }
@@ -170,6 +172,20 @@ inline uint64_t string_to_uint64(const std::string& s) {
   }
 
   return value;
+}
+
+inline std::string FetchTemporaryFile(const std::string& url)
+{
+  const std::string filename = url.substr(url.find_last_of('/') + 1);
+  cpr::Response r = cpr::Get(cpr::Url{url});
+  SaveToFile(r.text, filename);
+
+  return filename;
+}
+
+inline void EraseFile(const std::string& path)
+{
+  std::remove(path.c_str());
 }
 
 #endif // __UTIL_HPP__

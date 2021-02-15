@@ -228,9 +228,12 @@ bool Client::PostStatus(Status status) {
  * @return false
  */
 bool Client::PostStatus(Status status, std::vector<File> files) {
-  for (const auto& file : files) {
-    Media media = PostMedia(file);
+  for (auto&& file : files) {
+    const bool download_file = (file.path.empty() && (!file.url.empty()));
+    file.path        = download_file ? FetchTemporaryFile(file.url) : file.path;
+    Media      media = PostMedia(file);
     status.media.emplace_back(std::move(media));
+    if (download_file) EraseFile(file.path);
   }
   return PostStatus(status);
 }
