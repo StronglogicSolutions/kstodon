@@ -1,15 +1,14 @@
-#ifndef __TYPES_HPP__
-#define __TYPES_HPP__
+#pragma once
 
 #include <vector>
 #include <string>
 #include <unordered_map>
-
 #include <cpr/cpr.h>
 #include <kjson.hpp>
 
 #include "util.hpp"
 
+namespace kstodon {
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ CONSTANTS ░░░░░░░░░░░░░░░░░░░░░░│
@@ -374,4 +373,4 @@ friend std::ostream &operator<<(std::ostream& o, const Conversation& c) {
 }
 };
 
-#endif // __TYPES_HPP__
+} // ns kstodon

@@ -8,9 +8,9 @@ namespace koreannews {
  *
  * @returns [out] {Status}
  */
-Status GenerateStatus()
+kstodon::Status GenerateStatus()
 {
-  Status status{};
+  kstodon::Status status{};
   status.content = GetNews();
 
   return status;
@@ -24,13 +24,13 @@ Status GenerateStatus()
  * @param   [in]  {Status} received_status
  * @returns [out] {Status}
  */
-Status ReplyToStatus(Status received_status)
+kstodon::Status ReplyToStatus(kstodon::Status received_status)
 {
   using namespace conversation;
 
   std::vector<Token> tokens = SplitTokens(TokenizeText(received_status.content));
 
-  Status status{};
+  kstodon::Status status{};
 
   if (!tokens.empty())
   {

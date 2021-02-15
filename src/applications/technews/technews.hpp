@@ -15,7 +15,7 @@ const std::string HASHTAGS{"#StronglogicSolutions #TechNews #News #Technology"};
  * Helper Functions
  */
 std::string GetAPIKey() {
-  return kstodon::GetConfigReader().GetString(constants::TECH_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
+  return kstodon::GetConfigReader().GetString(kstodon::constants::TECH_NEWS_SECTION, kstodon::constants::NEWSAPI_CONFIG_KEY, "");
 }
 
 std::string GetURL() {
@@ -23,11 +23,11 @@ std::string GetURL() {
 }
 
 nlohmann::json GetDatabase() {
-   return LoadJSONFile(DB_PATH);
+   return kstodon::LoadJSONFile(DB_PATH);
 }
 
 void SaveDatabase(nlohmann::json data) {
-  SaveToFile(data, DB_PATH);
+  kstodon::SaveToFile(data, DB_PATH);
 }
 
 bool AlreadySaved(std::string id) {
@@ -57,7 +57,7 @@ void SavePostID(std::string id) {
 
 
 nlohmann::json GetNewsJSON() {
-  RequestResponse response{cpr::Get(
+  kstodon::RequestResponse response{cpr::Get(
     cpr::Url{GetURL()}
   )};
 
@@ -100,9 +100,9 @@ std::string GetNews() {
  *
  * @returns [out] {Status}
  */
-Status GenerateStatus()
+kstodon::Status GenerateStatus()
 {
-  Status status{};
+  kstodon::Status status{};
   status.content = GetNews();
   status.visibility = "private";
 
@@ -117,13 +117,13 @@ Status GenerateStatus()
  * @param   [in]  {Status} received_status
  * @returns [out] {Status}
  */
-Status ReplyToStatus(Status received_status)
+kstodon::Status ReplyToStatus(kstodon::Status received_status)
 {
   using namespace conversation;
 
   std::vector<Token> tokens = SplitTokens(TokenizeText(received_status.content));
 
-  Status status{};
+  kstodon::Status status{};
 
   if (!tokens.empty())
   {

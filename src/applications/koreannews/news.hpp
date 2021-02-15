@@ -17,7 +17,7 @@ const std::string to_string() const
   return std::string{
     koreannews::HASHTAGS + '\n' +
     url                  + '\n' +
-    SanitizeOutput(title)                + '\n' +
+    kstodon::SanitizeOutput(title)                + '\n' +
     description
   };
 }

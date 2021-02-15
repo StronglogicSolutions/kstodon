@@ -37,6 +37,7 @@ inline bool JSONHasUser(nlohmann::json data, std::string username) {
 
 inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username) {
   using json = nlohmann::json;
+  using namespace kjson;
 
   Credentials creds{};
 
@@ -88,6 +89,7 @@ inline std::string AuthToJSON(Auth auth) {
 
 inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
   using json = nlohmann::json;
+  using namespace kjson;
 
   Auth auth{};
 

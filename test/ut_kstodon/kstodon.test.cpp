@@ -163,8 +163,8 @@ TEST(CPRTest, FetchAndSaveFile)
 {
   const std::string url{"https://kiq.monster/logo-medium.png"};
 
-  std::string filename = FetchTemporaryFile(url);
-  std::string file     = ReadFromFile(filename);
+  std::string filename = kstodon::FetchTemporaryFile(url);
+  std::string file     = kstodon::ReadFromFile(filename);
 
   EXPECT_EQ(filename, "logo-medium.png");
   EXPECT_FALSE(file.empty());

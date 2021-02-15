@@ -20,14 +20,14 @@ int main(int argc, char** argv)
   kstodon::ExecuteConfig config {kstodon::ParseRuntimeArguments(argc, argv)};
   kstodon::Bot           bot    {config.username};
   kstodon::BotStats      stats  {};
-  std::vector<File>      files  {};
+  std::vector<kstodon::File>      files  {};
   std::string            std_out{};
 
   if (config.execute_bot)                               // BOT MODE
   {
-    std::vector<Conversation> replies = bot.FindReplies();
+    std::vector<kstodon::Conversation> replies = bot.FindReplies();
 
-    for (const Conversation& reply : replies)
+    for (const kstodon::Conversation& reply : replies)
     {
       if (reply.status.is_valid())
         (bot.ReplyToStatus(reply.status)) ?
@@ -39,15 +39,15 @@ int main(int argc, char** argv)
   {
     if (!config.file_paths.empty())
       for (const auto& path : config.file_paths)
-        files.emplace_back(File{path});
+        files.emplace_back(kstodon::File{path});
 
-    (bot.PostStatus(Status{config.message}, files)) ?
+    (bot.PostStatus(kstodon::Status{config.message}, files)) ?
       stats.tx_msg++ : stats.tx_err++;                  // tx or err
   }
 
   std_out += "Bot execution complete:\n" + stats.to_string();
 
-  log(std_out);
+  kstodon::log(std_out);
 
   return 0;
 }

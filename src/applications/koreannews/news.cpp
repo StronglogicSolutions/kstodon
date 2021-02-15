@@ -35,7 +35,7 @@ void        SetLanguage(kstodon::Language language) {
 }
 
 std::string GetAPIKey() {
-  return kstodon::GetConfigReader().GetString(constants::KOREAN_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
+  return kstodon::GetConfigReader().GetString(kstodon::constants::KOREAN_NEWS_SECTION, kstodon::constants::NEWSAPI_CONFIG_KEY, "");
 }
 
 std::string GetURL() {
@@ -65,7 +65,7 @@ void SavePost(const std::string& url) {
   PSQLORM db = GetDatabase();
 
   if (!db.insert(DB_NAME, {"url"},{url}))
-    log("Could not save to database");
+    kstodon::log("Could not save to database");
 }
 
 bool AlreadySaved(std::string url) {
@@ -85,14 +85,14 @@ bool AlreadySaved(std::string url) {
   );
 
   for (const auto& value : values)
-    log(value.first + " : " + value.second);
+    kstodon::log(value.first + " : " + value.second);
 
   return !values.empty();
 }
 
 
 nlohmann::json GetNewsJSON() {
-  RequestResponse response{cpr::Get(
+  kstodon::RequestResponse response{cpr::Get(
     cpr::Url{GetURL()}
   )};
 
@@ -101,7 +101,7 @@ nlohmann::json GetNewsJSON() {
 }
 
 std::string GetNewsXML() {
-  RequestResponse response{cpr::Get(
+  kstodon::RequestResponse response{cpr::Get(
     cpr::Url{GetRSSURL()}
   )};
 

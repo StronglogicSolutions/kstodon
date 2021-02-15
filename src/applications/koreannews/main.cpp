@@ -35,10 +35,10 @@ int main(int argc, char** argv)
   //   (bot.ReplyToStatus(comment)) ? stats.tx_msg++ : stats.tx_err++;
   // }
 
-  (bot.PostStatus(Status{})) ?                                      // New Post
+  (bot.PostStatus(kstodon::Status{})) ?                                      // New Post
     stats.tx_msg++ : stats.tx_err++;
 
-  log(stats.to_string());
+  kstodon::log(stats.to_string());
 
   return 0;
 }

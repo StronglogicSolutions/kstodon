@@ -2,6 +2,7 @@
 
 #include <string>
 
+namespace kstodon {
 namespace constants {
 const bool        JSON_PARSE_NO_THROW{false};
 const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
@@ -51,3 +52,4 @@ inline const std::string STATUS_CONTEXT_URL(const std::string& base_url, uint64_
 
 } // namespace MastodonOnline
 } // namespace constants
+} // namespace kstodon

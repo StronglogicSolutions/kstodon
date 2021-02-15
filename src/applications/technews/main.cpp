@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   (bot.PostStatus()) ?                                      // New Post
     stats.tx_msg++ : stats.tx_err++;
 
-  log(stats.to_string());
+  kstodon::log(stats.to_string());
 
   return 0;
 }
