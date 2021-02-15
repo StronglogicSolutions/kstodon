@@ -28,10 +28,16 @@ source_set("knlp_sources") {
   ]
 }
 
+config("inih") {
+  include_dirs = [
+    "//third_party/inih/cpp"
+  ]
+}
+
 source_set("ini_reader") {
   sources = [
-    "//src/kstodon/common/ini.c",
-    "//src/kstodon/common/INIReader.cpp"
+    "//third_party/inih/ini.c",
+    "//third_party/inih/cpp/INIReader.cpp"
   ]
 }
 
@@ -43,7 +49,7 @@ source_set("kstodon_sources") {
   ]
 
   public_configs = [
-    # ":inih",
+    ":inih",
     ":cpr",
     ":json",
     ":html",
@@ -66,6 +72,28 @@ source_set("kstodon_sources") {
 }
 
 executable("kstodon") {
+  deps = [
+    ":kstodon_sources"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  libs = [
+    "pthread",
+    "crypto",
+    "cpr",
+    "curl"
+  ]
+
+  sources = [
+    "//src/kstodon/main.cpp"
+  ]
+}
+
+shared_library("kstodon_lib") {
   deps = [
     ":kstodon_sources"
   ]

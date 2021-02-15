@@ -131,15 +131,15 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 }
 
 /**
- * @brief
+ * @brief FetchChildStatuses
  *
- * @param id
- * @return std::vector<Status>
+ * @param   [in]  {StatusID}              id
+ * @returns [out] {std::vector<Status>}
  */
 std::vector<Status> Client::FetchChildStatuses(StatusID id) {
   using json = nlohmann::json;
-  // api/v1/accounts/:id/statuses
-  const std::string URL = STATUS_CONTEXT_URL(BASE_URL, id);
+
+  const std::string URL = STATUS_CONTEXT_URL(BASE_URL, id); // api/v1/accounts/:id/statuses
 
   RequestResponse response{cpr::Get(
     cpr::Url{URL}
