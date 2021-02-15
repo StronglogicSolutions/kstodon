@@ -50,9 +50,9 @@ Database::PSQLORM GetDatabase() {
   return Database::PSQLORM{
     DatabaseConfiguration{
       .credentials = DatabaseCredentials{
-        .user     = "knewsadmin",
-        .password = "knewsadmin",
-        .name     = "knews"
+        .user     = "", // Load via config
+        .password = "",
+        .name     = ""
       },
       .address = "127.0.0.1",
       .port    = "5432"
