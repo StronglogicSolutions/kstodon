@@ -1,15 +1,14 @@
-#ifndef __TYPES_HPP__
-#define __TYPES_HPP__
+#pragma once
 
 #include <vector>
 #include <string>
 #include <unordered_map>
-
 #include <cpr/cpr.h>
-#include <nlohmann/json.hpp>
+#include <kjson.hpp>
 
 #include "util.hpp"
 
+namespace kstodon {
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ CONSTANTS ░░░░░░░░░░░░░░░░░░░░░░│
@@ -77,35 +76,6 @@ cpr::Multipart multiformdata() {
 }
 };
 
-inline std::string GetJSONStringValue(nlohmann::json data, std::string key) {
-  if (!data.is_null() && data.contains(key) && !data[key].is_null())
-    return data[key].get<std::string>();
-  return "";
-}
-
-template<typename T>
-inline T GetJSONValue(nlohmann::json data, std::string key) {
-  if (!data.is_null() && data.contains(key) && !data[key].is_null())
-    return data[key].get<T>();
-
-  if (std::is_integral<T>::value)
-    return static_cast<T>(0);
-  if (std::is_floating_point<T>::value)
-    return static_cast<T>(0);
-  if constexpr (std::is_same_v<std::string, T>)
-    return "";
-  if constexpr (std::is_same_v<std::vector<std::string>, T>) {
-    return std::vector<std::string>{};
-  }
-
-  throw std::invalid_argument{"Unsupported type"};
-}
-
-inline bool GetJSONBoolValue(nlohmann::json data, std::string key) {
-  if (!data.is_null() && data.contains(key) && !data[key].is_null())
-    return data[key].get<bool>();
-  return "";
-}
 
 /**
   ┌───────────────────────────────────────────────────────────┐
@@ -403,4 +373,4 @@ friend std::ostream &operator<<(std::ostream& o, const Conversation& c) {
 }
 };
 
-#endif // __TYPES_HPP__
+} // ns kstodon

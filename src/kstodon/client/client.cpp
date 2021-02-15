@@ -241,6 +241,25 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
 /**
  * @brief
  *
+ * @param status
+ * @param files
+ * @return true
+ * @return false
+ */
+bool Client::PostStatus(Status status, std::vector<std::string> files) {
+  for (const auto& file : files) {
+    auto path = FetchTemporaryFile(file);
+      status.media.emplace_back(std::move(
+        PostMedia(path)
+      ));
+      EraseFile(path);
+  }
+  return PostStatus(status);
+}
+
+/**
+ * @brief
+ *
  * @return std::vector<Conversation>
  */
 std::vector<Conversation> Client::FetchConversations() {

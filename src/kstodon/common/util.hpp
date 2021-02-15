@@ -1,5 +1,4 @@
-#ifndef __UTIL_HPP__
-#define __UTIL_HPP__
+#pragma once
 
 #include <ctime>
 #include <iomanip>
@@ -10,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 
+namespace kstodon {
 inline const std::string get_executable_cwd() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
@@ -188,4 +188,4 @@ inline void EraseFile(const std::string& path)
   std::remove(path.c_str());
 }
 
-#endif // __UTIL_HPP__
+} // ns kstodon

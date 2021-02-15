@@ -145,7 +145,7 @@ TEST(KStodonTests, DISABLED_FindAndReply) {
   EXPECT_FALSE(replies.empty());
 }
 
-TEST(KStodonTests, GetChildren) {
+TEST(KStodonTests, DISABLED_GetChildren) {
   using namespace kstodon;
 
   Client client{};
@@ -157,4 +157,15 @@ TEST(KStodonTests, GetChildren) {
   }
 
   EXPECT_FALSE(statuses.empty());
+}
+
+TEST(CPRTest, FetchAndSaveFile)
+{
+  const std::string url{"https://kiq.monster/logo-medium.png"};
+
+  std::string filename = kstodon::FetchTemporaryFile(url);
+  std::string file     = kstodon::ReadFromFile(filename);
+
+  EXPECT_EQ(filename, "logo-medium.png");
+  EXPECT_FALSE(file.empty());
 }

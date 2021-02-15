@@ -5,6 +5,7 @@
 
 #include "constants.hpp"
 
+namespace kstodon {
 class request_error : public std::logic_error {
 public:
 explicit request_error(const std::string message)
@@ -93,3 +94,5 @@ const std::string GetError() const {
   return "";
 }
 };
+
+} // namespace kstodon

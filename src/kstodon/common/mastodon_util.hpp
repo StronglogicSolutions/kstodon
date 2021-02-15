@@ -2,6 +2,16 @@
 
 #include "types.hpp"
 
+// Forward Declarations
+// namespace kjson {
+// namespace constants {
+// extern const bool JSON_PARSE_NO_THROW;
+// } // namespace constants
+// std::string GetJSONStringValue(const nlohmann::json& data, const std::string& key);
+// bool        GetJSONBoolValue(const nlohmann::json& data, const std::string& key);
+// } // namespace kjson
+
+namespace kstodon {
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ HelperFns ░░░░░░░░░░░░░░░░░░░░░░░│
@@ -86,6 +96,8 @@ inline bool RemoveStatusID(std::string username, uint64_t id) {
 }
 
 inline Account ParseAccountFromJSON(nlohmann::json data) {
+  using namespace kjson;
+
   Account account{};
   std::string s = data.dump();
   if (!data.is_null()) {
@@ -154,6 +166,8 @@ inline std::vector<Mention> ParseMentionsFromJSON(nlohmann::json data) {
 }
 
 inline Media ParseMediaFromJSON(nlohmann::json data) {
+  using namespace kjson;
+
   Media media{};
 
   if (!data.is_null() && data.is_object()) {
@@ -227,6 +241,8 @@ inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
  * @return Status
  */
 inline Status JSONToStatus(nlohmann::json data) {
+  using namespace kjson;
+
   Status status{};
   std::string s = data.dump();
   try {
@@ -298,6 +314,8 @@ inline std::vector<Status> JSONContextToStatuses(nlohmann::json data) {
   return statuses;
 }
 inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
+  using namespace kjson;
+
   std::vector<Conversation> conversations{};
 
   if (!data.is_null() && data.is_array()) {
@@ -373,3 +391,5 @@ inline std::string MakeMention(const Status& status) {
   }
   return "";
 }
+
+} // namespace kstodon

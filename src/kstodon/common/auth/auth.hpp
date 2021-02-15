@@ -1,10 +1,10 @@
-#ifndef __AUTH_HPP__
-#define __AUTH_HPP__
+#pragma once
 
 #include <INIReader.h>
 #include "kstodon/common/request.hpp"
 #include "kstodon/common/mastodon_util.hpp"
 
+namespace kstodon {
 inline const std::string get_dir() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
@@ -37,6 +37,7 @@ inline bool JSONHasUser(nlohmann::json data, std::string username) {
 
 inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username) {
   using json = nlohmann::json;
+  using namespace kjson;
 
   Credentials creds{};
 
@@ -88,6 +89,7 @@ inline std::string AuthToJSON(Auth auth) {
 
 inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
   using json = nlohmann::json;
+  using namespace kjson;
 
   Auth auth{};
 
@@ -112,16 +114,16 @@ Authenticator(std::string username = "")
 : m_username(username),
   m_authenticated(false)
 {
-  if (m_username.empty()) {
-    INIReader reader{std::string{get_dir() + "../" + constants::DEFAULT_CONFIG_PATH}};
+  auto config = GetConfigReader();
 
-    if (reader.ParseError() < 0) {
+  if (m_username.empty()) {
+
+    if (config.ParseError() < 0) {
       log("Error loading config");
       throw std::invalid_argument{"No configuration path"};
     }
 
-
-    auto name = reader.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
+    auto name = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
 
     if (name.empty()) {
       throw std::invalid_argument{"No username in config. Please provide a username"};
@@ -130,30 +132,36 @@ Authenticator(std::string username = "")
     m_username = name;
   }
 
-  m_credentials_json = LoadJSONFile(get_dir() + "../" + constants::CONFIG_JSON_PATH);
-  auto credentials   = ParseCredentialsFromJSON(m_credentials_json, m_username);
+  auto creds_path    = config.GetString(constants::KSTODON_SECTION, constants::CREDS_PATH_KEY, "");
 
-  if (!credentials.is_valid()) {
-    throw std::invalid_argument{"Credentials not found"};
-  }
+  if (!creds_path.empty())
+    m_credentials = ParseCredentialsFromJSON(LoadJSONFile(creds_path), m_username);
 
-  m_credentials = credentials;
+  auto tokens_path = config.GetString(constants::KSTODON_SECTION, constants::TOKENS_PATH_KEY, "");
 
-  m_token_json = LoadJSONFile(get_dir() + "../" + constants::TOKEN_JSON_PATH);
+  if (!tokens_path.empty())
+    m_token_json = LoadJSONFile(tokens_path);
+  {
+    if (
+      m_token_json.contains("users")    &&
+      !m_token_json["users"].is_null()  &&
+      m_token_json["users"].contains(m_username) &&
+      !m_token_json["users"][m_username].is_null()) {
 
-  if (
-    m_token_json.contains("users")    &&
-    !m_token_json["users"].is_null()  &&
-    m_token_json["users"].contains(m_username) &&
-    !m_token_json["users"][m_username].is_null()) {
+      auto auth = ParseAuthFromJSON(m_token_json["users"][m_username]);
 
-    auto auth = ParseAuthFromJSON(m_token_json["users"][m_username]);
-
-    if (auth.is_valid()) {
-      m_auth = auth;
-      m_authenticated = true;
+      if (auth.is_valid()) {
+        m_auth = auth;
+        m_authenticated = true;
+      }
     }
   }
+
+  if (!m_credentials.is_valid())
+    throw std::invalid_argument{"Credentials not found"};
+
+  if (m_token_json.is_null())
+    throw std::invalid_argument{"Tokens not found"};
 }
 
 /**
@@ -293,4 +301,4 @@ json         m_credentials_json;
 
 };
 
-#endif // __AUTH_HPP__
+} // namespace kstodon

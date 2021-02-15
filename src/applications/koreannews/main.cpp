@@ -9,33 +9,36 @@
  */
 int main(int argc, char** argv)
 {
-  kstodon::GenerateFunction gen_status_fn_ptr = &technews::GenerateStatus;
-  kstodon::ReplyFunction    rep_status_fn_ptr = &technews::ReplyToStatus;
+  kstodon::ExecuteConfig    config            = kstodon::ParseRuntimeArguments(argc, argv);
+  kstodon::GenerateFunction gen_status_fn_ptr = &koreannews::GenerateStatus;
+  kstodon::ReplyFunction    rep_status_fn_ptr = &koreannews::ReplyToStatus;
+
+  koreannews::SetLanguage(config.language);
 
   kstodon::Bot bot{
-    technews::NAME,
+    koreannews::NAME,
     gen_status_fn_ptr,
     rep_status_fn_ptr
   };
 
   kstodon::BotStats stats{};
 
-  for (const auto& private_conversation : bot.FindReplies()) // DMs
-  {
-    stats.rx_msg++;
-    (bot.ReplyToStatus(private_conversation.status)) ?  stats.tx_msg++ : stats.tx_err++;
-  }
+  // for (const auto& private_conversation : bot.FindReplies()) // DMs
+  // {
+  //   stats.rx_msg++;
+  //   (bot.ReplyToStatus(private_conversation.status)) ?  stats.tx_msg++ : stats.tx_err++;
+  // }
 
-  for (const auto& comment : bot.FindComments())            // Comments
-  {
-    stats.rx_msg++;
-    (bot.ReplyToStatus(comment)) ? stats.tx_msg++ : stats.tx_err++;
-  }
+  // for (const auto& comment : bot.FindComments())            // Comments
+  // {
+  //   stats.rx_msg++;
+  //   (bot.ReplyToStatus(comment)) ? stats.tx_msg++ : stats.tx_err++;
+  // }
 
-  (bot.PostStatus()) ?                                      // New Post
+  (bot.PostStatus(kstodon::Status{})) ?                                      // New Post
     stats.tx_msg++ : stats.tx_err++;
 
-  log(stats.to_string());
+  kstodon::log(stats.to_string());
 
   return 0;
 }
