@@ -1,10 +1,10 @@
-#ifndef __AUTH_HPP__
-#define __AUTH_HPP__
+#pragma once
 
 #include <INIReader.h>
 #include "kstodon/common/request.hpp"
 #include "kstodon/common/mastodon_util.hpp"
 
+namespace kstodon {
 inline const std::string get_dir() {
   char* path = realpath("/proc/self/exe", NULL);
   char* name = basename(path);
@@ -299,4 +299,4 @@ json         m_credentials_json;
 
 };
 
-#endif // __AUTH_HPP__
+} // namespace kstodon

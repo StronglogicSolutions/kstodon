@@ -15,7 +15,7 @@ const std::string HASHTAGS{"#StronglogicSolutions #TechNews #News #Technology"};
  * Helper Functions
  */
 std::string GetAPIKey() {
-  return GetConfigReader().GetString(constants::TECH_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
+  return kstodon::GetConfigReader().GetString(constants::TECH_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
 }
 
 std::string GetURL() {

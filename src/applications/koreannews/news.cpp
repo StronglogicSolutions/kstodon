@@ -35,7 +35,7 @@ void        SetLanguage(kstodon::Language language) {
 }
 
 std::string GetAPIKey() {
-  return GetConfigReader().GetString(constants::KOREAN_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
+  return kstodon::GetConfigReader().GetString(constants::KOREAN_NEWS_SECTION, constants::NEWSAPI_CONFIG_KEY, "");
 }
 
 std::string GetURL() {
