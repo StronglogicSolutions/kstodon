@@ -331,7 +331,7 @@ virtual std::string postdata() override {
   std::string delim{""};
 
   for (const auto& media_item : media) {
-    media_ids += media_item.id;
+    media_ids += delim + media_item.id;
     delim = ",";
   }
 
