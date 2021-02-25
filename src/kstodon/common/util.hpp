@@ -174,9 +174,19 @@ inline uint64_t string_to_uint64(const std::string& s) {
   return value;
 }
 
-inline std::string FetchTemporaryFile(const std::string& url)
+inline std::string FetchTemporaryFile(const std::string& full_url)
 {
-  const std::string filename = url.substr(url.find_last_of('/') + 1);
+  auto ext_end = full_url.find_first_of('?');
+  ext_end      = ext_end == std::string::npos ? full_url.size() : ext_end;
+  auto url     = full_url.substr(0, ext_end);
+  auto ext_beg = url.find_last_of('.');
+  auto ext_len = (ext_beg != url.npos) ? (url.size() - ext_beg) : 0;
+
+  auto filename = (ext_len > 0) ?
+                    "test_file" + url.substr(ext_beg, ext_len) :
+                    "test_file";
+
+
   cpr::Response r = cpr::Get(cpr::Url{url});
   SaveToFile(r.text, filename);
 

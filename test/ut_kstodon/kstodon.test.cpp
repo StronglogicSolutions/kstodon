@@ -159,13 +159,33 @@ TEST(KStodonTests, DISABLED_GetChildren) {
   EXPECT_FALSE(statuses.empty());
 }
 
-TEST(CPRTest, FetchAndSaveFile)
+// TEST(CPRTest, FetchAndSaveFile)
+// {
+//   const std::string url{"https://instagram.fymy1-2.fna.fbcdn.net/v/t51.2885-15/e15/152779540_420270432612013_5563537731454901171_n.jpg?_nc_ht=instagram.fymy1-2.fna.fbcdn.net&_nc_cat=101&_nc_ohc=z188AsgLchcAX9D32AK&tp=1&oh=0ab6260752f52c2e8d2a5806fd34e958&oe=605E07B3&ig_cache_key=MjUxNTkzODcyNTM0ODAwMzE4Mg%3D%3D.2"};
+
+//   std::string filename = kstodon::FetchTemporaryFile(url);
+//   // std::string file     = kstodon::ReadFromFile(filename);
+
+//   EXPECT_EQ(filename, "temp_file.jpg");
+//   EXPECT_FALSE(file.empty());
+
+// }
+
+TEST(KStodonTest, FetchTempAndPostStatus)
 {
-  const std::string url{"https://kiq.monster/logo-medium.png"};
+  const std::string url1{"https://files.mastodon.online/site_uploads/files/000/000/001/original/rio2.png"};
 
-  std::string filename = kstodon::FetchTemporaryFile(url);
-  std::string file     = kstodon::ReadFromFile(filename);
+  const std::string url2{"https://files.mastodon.online/media_attachments/files/105/688/686/326/414/629/original/03f9acea7be02b29.jpeg"};
 
-  EXPECT_EQ(filename, "logo-medium.png");
-  EXPECT_FALSE(file.empty());
+  // std::string file     = kstodon::ReadFromFile(filename);
+
+  kstodon::Bot bot{};
+
+  kstodon::Status status{"How do these two go together?"};
+  status.visibility = kstodon::constants::StatusVisibility::PRIVATE;
+
+  auto result = bot.PostStatus(status, std::vector<std::string>{url1, url2});
+
+
+  EXPECT_TRUE(result);
 }
