@@ -187,7 +187,7 @@ inline std::string FetchTemporaryFile(const std::string& full_url)
                     "test_file";
 
 
-  cpr::Response r = cpr::Get(cpr::Url{url});
+  cpr::Response r = cpr::Get(cpr::Url{full_url});
   SaveToFile(r.text, filename);
 
   return filename;
