@@ -212,7 +212,8 @@ bool Client::PostStatus(Status status) {
     if (returned_status.content.empty())
       return false;
 
-    SaveStatusID(returned_status.id, m_authenticator.GetUsername());
+    m_statuses.emplace_back(std::move(returned_status));
+
     reply_to_id = std::to_string(returned_status.id);
   }
 
@@ -297,6 +298,24 @@ Account Client::GetAccount() {
  */
 std::string Client::GetUsername() {
   return m_authenticator.GetUsername();
+}
+
+bool Client::HasPostedStatuses() const
+{
+  return (!m_statuses.empty());
+}
+
+Status Client::GetPostedStatus()
+{
+  Status status;
+
+  if (HasPostedStatuses())
+  {
+    status = m_statuses.front();
+    m_statuses.pop_front();
+  }
+
+  return status;
 }
 
 } // namespace kstodon
