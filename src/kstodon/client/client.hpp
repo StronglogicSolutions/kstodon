@@ -1,5 +1,7 @@
 #pragma once
 
+#include <deque>
+
 #include "kstodon/common/auth/auth.hpp"
 #include "kstodon/common/interface.hpp"
 
@@ -29,12 +31,15 @@ virtual bool                PostStatus(Status status, std::vector<File> media) o
 virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
         std::string         GetUsername();
+        bool                HasPostedStatuses() const;
+        Status              GetPostedStatus();
 
 std::vector<Conversation>   FetchConversations();
 
 private:
 using json = nlohmann::json;
-Authenticator m_authenticator;
+Authenticator      m_authenticator;
+std::deque<Status> m_statuses;
 };
 
 } // namespace kstodon
