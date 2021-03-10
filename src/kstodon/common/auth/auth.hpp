@@ -112,7 +112,8 @@ public:
 
 Authenticator(std::string username = "")
 : m_username(username),
-  m_authenticated(false)
+  m_authenticated(false),
+  m_verify_ssl{true}
 {
   auto config = GetConfigReader();
 
@@ -121,6 +122,11 @@ Authenticator(std::string username = "")
     if (config.ParseError() < 0) {
       log("Error loading config");
       throw std::invalid_argument{"No configuration path"};
+    }
+
+    auto verify_ssl = config.GetString(constants::KSTODON_SECTION, constants::VERIFY_SSL_KEY, "true");
+    if (!verify_ssl.empty()) {
+      m_verify_ssl = (verify_ssl == "true");
     }
 
     auto name = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
@@ -153,6 +159,7 @@ Authenticator(std::string username = "")
       if (auth.is_valid()) {
         m_auth = auth;
         m_authenticated = true;
+        m_tokens_path = tokens_path;
       }
     }
   }
@@ -188,7 +195,8 @@ bool FetchToken() {
         "grant_type=" + AUTHORIZATION_CODE_GRANT_TYPE + "&" +
         "code=" + m_credentials.code + "&" +
         "scope=" + m_credentials.scope
-      }}
+      }},
+      cpr::VerifySsl{verify_ssl()}
     );
 
     response = r.text;
@@ -202,7 +210,7 @@ bool FetchToken() {
         m_auth = auth;
         m_authenticated = true;
         m_token_json["users"][m_username] = auth_json;
-        SaveToFile(m_token_json.dump(), constants::TOKEN_JSON_PATH);
+        SaveToFile(m_token_json.dump(), m_tokens_path);
         return true;
       } else {
         log("Failed to parse token");
@@ -236,7 +244,8 @@ bool VerifyToken() {
       cpr::Url{URL},
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), GetBearerAuth()}
-     }
+      },
+      cpr::VerifySsl{verify_ssl()}
     );
 
     if (!r.text.empty()) {
@@ -288,6 +297,10 @@ std::string GetUsername() {
   return m_username;
 }
 
+bool verify_ssl() {
+  return m_verify_ssl;
+}
+
 private:
 using json = nlohmann::json;
 
@@ -298,6 +311,8 @@ std::string  m_username;
 bool         m_authenticated;
 json         m_token_json;
 json         m_credentials_json;
+std::string  m_tokens_path;
+bool         m_verify_ssl;
 
 };
 

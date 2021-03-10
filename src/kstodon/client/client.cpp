@@ -167,7 +167,8 @@ Media Client::PostMedia(File file) {
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
     },
-    file.multiformdata()
+    file.multiformdata(),
+    cpr::VerifySsl{m_authenticator.verify_ssl()}
   );
 
   if (r.status_code < 400) {
@@ -201,7 +202,8 @@ bool Client::PostStatus(Status status) {
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
       },
-      cpr::Body{outgoing_status.postdata()}
+      cpr::Body{outgoing_status.postdata()},
+      cpr::VerifySsl{m_authenticator.verify_ssl()}
     )};
 
     if (response.error)
@@ -272,7 +274,8 @@ std::vector<Conversation> Client::FetchConversations() {
     cpr::Url{CONVERSATION_URL},
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
-    }
+    },
+    cpr::VerifySsl{m_authenticator.verify_ssl()}
   )};
 
   if (response.error) {
