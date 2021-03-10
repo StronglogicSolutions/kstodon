@@ -174,7 +174,7 @@ inline uint64_t string_to_uint64(const std::string& s) {
   return value;
 }
 
-inline std::string FetchTemporaryFile(const std::string& full_url)
+inline std::string FetchTemporaryFile(const std::string& full_url, const bool verify_ssl = true)
 {
   auto ext_end = full_url.find_first_of('?');
   ext_end      = ext_end == std::string::npos ? full_url.size() : ext_end;
@@ -187,7 +187,7 @@ inline std::string FetchTemporaryFile(const std::string& full_url)
                     "test_file";
 
 
-  cpr::Response r = cpr::Get(cpr::Url{full_url});
+  cpr::Response r = cpr::Get(cpr::Url{full_url}, cpr::VerifySsl(verify_ssl));
   SaveToFile(r.text, filename);
 
   return filename;

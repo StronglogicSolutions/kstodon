@@ -233,7 +233,8 @@ bool Client::PostStatus(Status status) {
 bool Client::PostStatus(Status status, std::vector<File> files) {
   for (auto&& file : files) {
     const bool download_file = (file.path.empty() && (!file.url.empty()));
-    file.path        = download_file ? FetchTemporaryFile(file.url) : file.path;
+    file.path        = download_file ? FetchTemporaryFile(file.url, m_authenticator.verify_ssl()) :
+                                       file.path;
     Media      media = PostMedia(file);
     status.media.emplace_back(std::move(media));
     if (download_file) EraseFile(file.path);
