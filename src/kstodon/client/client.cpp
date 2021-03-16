@@ -32,14 +32,19 @@ std::vector<std::string> const ChunkMessage(const std::string& message) {
     while (bytes_chunked < message_size) {
       const std::string::size_type size_to_chunk =
         (bytes_chunked + MAX_CHUNK_SIZE > message_size) ?
-        (message_size - bytes_chunked) :
-        MAX_CHUNK_SIZE;
+          (message_size - bytes_chunked) :
+          MAX_CHUNK_SIZE;
 
       std::string oversized_chunk = message.substr(bytes_chunked, size_to_chunk);
 
       const std::string::size_type ws_idx = oversized_chunk.find_last_of(" ") + 1;
       const std::string::size_type pd_idx = oversized_chunk.find_last_of(".") + 1;
-      const std::string::size_type index  = (ws_idx > pd_idx) ? ws_idx : pd_idx;
+      const std::string::size_type index  =
+        (size_to_chunk > MAX_CHUNK_SIZE) ?
+          (ws_idx > pd_idx) ?
+            ws_idx : pd_idx
+            :
+            size_to_chunk;
 
       chunks.emplace_back(
         index == 0 ?
@@ -252,7 +257,7 @@ bool Client::PostStatus(Status status, std::vector<File> files) {
  */
 bool Client::PostStatus(Status status, std::vector<std::string> files) {
   for (const auto& file : files) {
-    auto path = FetchTemporaryFile(file);
+    auto path = FetchTemporaryFile(file, m_authenticator.verify_ssl());
       status.media.emplace_back(std::move(
         PostMedia(path)
       ));
