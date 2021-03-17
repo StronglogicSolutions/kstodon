@@ -11,6 +11,7 @@ const std::string TOKEN_JSON_PATH    {"config/token.json"};
 const std::string DB_JSON_PATH       {"config/db.json"};
 const std::string KSTODON_SECTION    {"kstodon"};
 const std::string VERIFY_SSL_KEY     {"verify_ssl"};
+const std::string BASE_URL_KEY       {"base_url"};
 const std::string TECH_NEWS_SECTION  {"technews"};
 const std::string KOREAN_NEWS_SECTION{"koreannews"};
 const std::string USER_CONFIG_KEY    {"user"};
@@ -34,7 +35,8 @@ const uint8_t ACCOUNTS_INDEX     = 0x03;
 const uint8_t MEDIA_INDEX        = 0x04;
 const uint8_t CONVERSATION_INDEX = 0x05;
 
-const std::string BASE_URL{"https://bitcoinhackers.org"};
+// const std::string BASE_URL{"https://bitcoinhackers.org"};
+const std::string BASE_URL{"https://mastodon.online"};
 
 const std::vector<std::string> PATH{
   "/oauth/token",

@@ -138,6 +138,11 @@ Authenticator(std::string username = "")
     m_verify_ssl = (verify_ssl == "true");
   }
 
+  auto base_url = config.GetString(constants::KSTODON_SECTION, constants::BASE_URL_KEY, "");
+  m_base_url = (base_url.empty()) ?
+    constants::MastodonOnline::BASE_URL : base_url;
+
+
   auto creds_path    = config.GetString(constants::KSTODON_SECTION, constants::CREDS_PATH_KEY, "");
 
   if (!creds_path.empty())
@@ -181,7 +186,7 @@ bool FetchToken() {
   using json = nlohmann::json;
 
   const std::string AUTHORIZATION_CODE_GRANT_TYPE{"authorization_code"};
-  const std::string AUTH_URL = BASE_URL + PATH.at(TOKEN_INDEX);
+  const std::string AUTH_URL = GetBaseURL() + PATH.at(TOKEN_INDEX);
   std::string       response;
   std::string       status;
 
@@ -297,6 +302,11 @@ std::string GetUsername() {
   return m_username;
 }
 
+const std::string GetBaseURL() const
+{
+  return m_base_url;
+}
+
 bool verify_ssl() {
   return m_verify_ssl;
 }
@@ -313,6 +323,7 @@ json         m_token_json;
 json         m_credentials_json;
 std::string  m_tokens_path;
 bool         m_verify_ssl;
+std::string  m_base_url;
 
 };
 

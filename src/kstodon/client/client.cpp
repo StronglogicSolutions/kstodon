@@ -15,7 +15,7 @@ using namespace constants::MastodonOnline;
  * @param   [in]  {std::string} message
  * @returns [out] {std::vector<std::string>}
  */
-std::vector<std::string> const ChunkMessage(const std::string& message) {
+static std::vector<std::string> const ChunkMessage(const std::string& message) {
   using namespace constants;
 
   const uint32_t MAX_CHUNK_SIZE = MASTODON_CHAR_LIMIT - 6;
@@ -93,7 +93,7 @@ bool Client::HasAuth() {
 Status Client::FetchStatus(uint64_t id) {
   using json = nlohmann::json;
 
-  const std::string STATUSES_URL = BASE_URL + PATH.at(STATUSES_INDEX) + "/" + std::to_string(id);
+  const std::string STATUSES_URL = m_authenticator.GetBaseURL() + PATH.at(STATUSES_INDEX) + "/" + std::to_string(id);
 
   cpr::Response r = cpr::Get(
     cpr::Url{STATUSES_URL}
@@ -122,7 +122,7 @@ Status Client::FetchStatus(uint64_t id) {
 std::vector<Status> Client::FetchUserStatuses(UserID id) {
   using json = nlohmann::json;
   // api/v1/accounts/:id/statuses
-  const std::string URL = BASE_URL + PATH.at(ACCOUNTS_INDEX) + '/' + id + "/statuses";
+  const std::string URL = m_authenticator.GetBaseURL() + PATH.at(ACCOUNTS_INDEX) + '/' + id + "/statuses";
 
   cpr::Response r = cpr::Get(
     cpr::Url{URL}
@@ -144,7 +144,7 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 std::vector<Status> Client::FetchChildStatuses(StatusID id) {
   using json = nlohmann::json;
 
-  const std::string URL = STATUS_CONTEXT_URL(BASE_URL, id); // api/v1/accounts/:id/statuses
+  const std::string URL = STATUS_CONTEXT_URL(m_authenticator.GetBaseURL(), id); // api/v1/accounts/:id/statuses
 
   RequestResponse response{cpr::Get(
     cpr::Url{URL}
@@ -165,7 +165,7 @@ std::vector<Status> Client::FetchChildStatuses(StatusID id) {
 Media Client::PostMedia(File file) {
   using namespace constants;
 
-  const std::string URL{BASE_URL + PATH.at(MEDIA_INDEX)};
+  const std::string URL{m_authenticator.GetBaseURL() + PATH.at(MEDIA_INDEX)};
 
   cpr::Response r = cpr::Post(
     cpr::Url{URL},
@@ -195,7 +195,7 @@ bool Client::PostStatus(Status status) {
   using namespace constants;
   using json = nlohmann::json;
 
-  const std::string              URL = BASE_URL + PATH.at(STATUSES_INDEX);
+  const std::string              URL = m_authenticator.GetBaseURL() + PATH.at(STATUSES_INDEX);
   const std::vector<std::string> messages = ChunkMessage(status.content);
   std::string                    reply_to_id = status.replying_to_id;
 
@@ -274,7 +274,7 @@ bool Client::PostStatus(Status status, std::vector<std::string> files) {
 std::vector<Conversation> Client::FetchConversations() {
   using namespace constants;
 
-  const std::string CONVERSATION_URL = BASE_URL + PATH.at(CONVERSATION_INDEX);
+  const std::string CONVERSATION_URL = m_authenticator.GetBaseURL() + PATH.at(CONVERSATION_INDEX);
 
   RequestResponse response{cpr::Get(
     cpr::Url{CONVERSATION_URL},
