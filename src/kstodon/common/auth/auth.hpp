@@ -153,7 +153,8 @@ Authenticator(std::string username = "")
   if (m_token_json.is_null())
     throw std::invalid_argument{"Tokens not found"};
 
-  SetUser(username);
+  if (SetUser(username))
+    throw std::invalid_argument{"Error setting user tokens"};
 }
 
 /**
