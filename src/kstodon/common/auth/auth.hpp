@@ -111,26 +111,23 @@ class Authenticator {
 public:
 
 Authenticator(std::string username = "")
-: m_username(username),
-  m_authenticated(false),
+: m_authenticated(false),
   m_verify_ssl{true}
 {
   auto config = GetConfigReader();
 
-  if (m_username.empty()) {
+  if (username.empty()) {
 
     if (config.ParseError() < 0) {
       log("Error loading config");
       throw std::invalid_argument{"No configuration path"};
     }
 
-    auto name = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
+    username = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
 
-    if (name.empty()) {
+    if (username.empty()) {
       throw std::invalid_argument{"No username in config. Please provide a username"};
     }
-
-    m_username = name;
   }
 
   auto verify_ssl = config.GetString(constants::KSTODON_SECTION, constants::VERIFY_SSL_KEY, "true");
@@ -142,38 +139,21 @@ Authenticator(std::string username = "")
   m_base_url = (base_url.empty()) ?
     constants::MastodonOnline::BASE_URL : base_url;
 
-
   auto creds_path    = config.GetString(constants::KSTODON_SECTION, constants::CREDS_PATH_KEY, "");
-
   if (!creds_path.empty())
-    m_credentials = ParseCredentialsFromJSON(LoadJSONFile(creds_path), m_username);
+    m_credentials_json = LoadJSONFile(creds_path);
 
   auto tokens_path = config.GetString(constants::KSTODON_SECTION, constants::TOKENS_PATH_KEY, "");
-
   if (!tokens_path.empty())
-    m_token_json = LoadJSONFile(tokens_path);
   {
-    if (
-      m_token_json.contains("users")    &&
-      !m_token_json["users"].is_null()  &&
-      m_token_json["users"].contains(m_username) &&
-      !m_token_json["users"][m_username].is_null()) {
-
-      auto auth = ParseAuthFromJSON(m_token_json["users"][m_username]);
-
-      if (auth.is_valid()) {
-        m_auth = auth;
-        m_authenticated = true;
-        m_tokens_path = tokens_path;
-      }
-    }
+    m_tokens_path = tokens_path;
+    m_token_json = LoadJSONFile(tokens_path);
   }
-
-  if (!m_credentials.is_valid())
-    throw std::invalid_argument{"Credentials not found"};
 
   if (m_token_json.is_null())
     throw std::invalid_argument{"Tokens not found"};
+
+  SetUser(username);
 }
 
 /**
@@ -239,11 +219,10 @@ bool VerifyToken() {
   using namespace constants;
   using namespace constants::MastodonOnline;
 
+  m_authenticated = false;
+
   const std::string URL = BASE_URL + PATH.at(TOKEN_VERIFY_INDEX);
 
-  // curl \
-	// -H 'Authorization: Bearer our_access_token_here' \
-	// https://mastodon.example/api/v1/accounts/verify_credentials
   if (m_auth.is_valid()) {
     cpr::Response r = cpr::Get(
       cpr::Url{URL},
@@ -263,12 +242,11 @@ bool VerifyToken() {
       );
 
       m_account = account;
-
-      return true;
+      m_authenticated = true;
     }
   }
 
-  return false;
+  return m_authenticated;
 }
 
 
@@ -296,6 +274,31 @@ Credentials get_credentials() {
 
 Account GetAccount() {
   return m_account;
+}
+
+bool SetUser(const std::string& username)
+{
+  Credentials credentials = ParseCredentialsFromJSON(m_credentials_json, m_username);
+  if (credentials.is_valid())
+  {
+    m_credentials = credentials;
+
+    if (m_token_json.contains("users")    &&
+        !m_token_json["users"].is_null()  &&
+        m_token_json["users"].contains(username) &&
+        !m_token_json["users"][username].is_null())
+    {
+      auto auth = ParseAuthFromJSON(m_token_json["users"][username]);
+
+      if (auth.is_valid()) {
+        m_auth = auth;
+        m_username = username;
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 std::string GetUsername() {
