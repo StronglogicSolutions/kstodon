@@ -11,12 +11,6 @@ config("html") {
   ]
 }
 
-config("cpr") {
-  include_dirs = [
-    "//third_party/cpr/include"
-  ]
-}
-
 config("knlp") {
   include_dirs = [
     "//third_party/knlp/src/nlp"
@@ -42,6 +36,19 @@ source_set("ini_reader") {
   ]
 }
 
+config("cpr_library") {
+  include_dirs = ["//third_party/cpr/include"]
+  lib_dirs = [ "//third_party/cpr/build/lib" ]
+  libs = [
+    "//third_party/cpr/build/lib/libcpr.so",
+  ]
+  visibility = [ ":cpr_lib" ]
+}
+
+group("cpr_lib") {
+  public_configs = [":cpr_library"]
+}
+
 source_set("kstodon_sources") {
 
   deps = [
@@ -49,9 +56,12 @@ source_set("kstodon_sources") {
     ":knlp_sources"
   ]
 
+  public_deps = [
+    ":cpr_lib",
+  ]
+
   public_configs = [
     ":inih",
-    ":cpr",
     ":kjson",
     ":html",
     ":knlp"
@@ -63,7 +73,6 @@ source_set("kstodon_sources") {
 
   libs = [
     "crypto",
-    "cpr",
     "curl",
   ]
 
@@ -79,13 +88,11 @@ executable("kstodon") {
 
   include_dirs = [
     "//src",
-    # "//third_party/json/include",
   ]
 
   libs = [
     "pthread",
     "crypto",
-    "cpr",
     "curl"
   ]
 
@@ -101,13 +108,11 @@ shared_library("kstodon_lib") {
 
   include_dirs = [
     "//src",
-    # "//third_party/json/include",
   ]
 
   libs = [
     "pthread",
     "crypto",
-    "cpr",
     "curl"
   ]
 
