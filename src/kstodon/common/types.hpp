@@ -135,6 +135,11 @@ friend std::ostream &operator<<(std::ostream& o, const Account& a) {
 
   return o;
 }
+
+bool is_valid()
+{
+  return !id.empty();
+}
 };
 
 struct Mention {

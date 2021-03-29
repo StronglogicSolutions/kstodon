@@ -78,6 +78,8 @@ Client::Client(const std::string& username)
 
   if (!m_authenticator.HasValidToken())
     throw std::invalid_argument{"Client was unable to authenticate."};
+
+  m_authenticator.VerifyToken();
 }
 
 bool Client::HasAuth() {

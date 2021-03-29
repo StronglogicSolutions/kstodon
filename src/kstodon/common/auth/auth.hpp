@@ -153,7 +153,7 @@ Authenticator(std::string username = "")
   if (m_token_json.is_null())
     throw std::invalid_argument{"Tokens not found"};
 
-  if (SetUser(username))
+  if (!SetUser(username))
     throw std::invalid_argument{"Error setting user tokens"};
 }
 
@@ -225,25 +225,20 @@ bool VerifyToken() {
   const std::string URL = BASE_URL + PATH.at(TOKEN_VERIFY_INDEX);
 
   if (m_auth.is_valid()) {
-    cpr::Response r = cpr::Get(
+    RequestResponse response{cpr::Get(
       cpr::Url{URL},
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), GetBearerAuth()}
       },
       cpr::VerifySsl{verify_ssl()}
-    );
+    )};
 
-    if (!r.text.empty()) {
-      log(r.text);
-
-      Account account = ParseAccountFromJSON(
-        nlohmann::json::parse(
-          r.text, nullptr, constants::JSON_PARSE_NO_THROW
-        )
-      );
-
-      m_account = account;
-      m_authenticated = true;
+    if (response.error)
+      kstodon::log(response.GetError());
+    else
+    {
+      m_account = ParseAccountFromJSON(response.json());
+      m_authenticated = m_account.is_valid();
     }
   }
 
@@ -279,7 +274,7 @@ Account GetAccount() {
 
 bool SetUser(const std::string& username)
 {
-  Credentials credentials = ParseCredentialsFromJSON(m_credentials_json, m_username);
+  Credentials credentials = ParseCredentialsFromJSON(m_credentials_json, username);
   if (credentials.is_valid())
   {
     m_credentials = credentials;
