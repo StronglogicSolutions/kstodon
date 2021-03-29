@@ -31,6 +31,8 @@ virtual bool                PostStatus(Status status, std::vector<File> media) o
 virtual Media               PostMedia(File file) override;
 virtual Account             GetAccount() override;
         std::string         GetUsername();
+        bool                SetUser(const std::string& username);
+
         bool                HasPostedStatuses() const;
         Status              GetPostedStatus();
 
