@@ -99,7 +99,7 @@ inline Account ParseAccountFromJSON(nlohmann::json data) {
   using namespace kjson;
 
   Account account{};
-  std::string s = data.dump();
+
   if (!data.is_null()) {
     account.id              = GetJSONStringValue(data, "id");
     account.username        = GetJSONStringValue(data, "username");

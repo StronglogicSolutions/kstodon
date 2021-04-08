@@ -1,9 +1,5 @@
 executable("ut_kstodon") {
 
-  public_configs = [
-    "//src/kstodon:cpr"
-  ]
-
   public_deps = [
     "//src/kstodon:kstodon_sources"
   ]

@@ -78,6 +78,8 @@ Client::Client(const std::string& username)
 
   if (!m_authenticator.HasValidToken())
     throw std::invalid_argument{"Client was unable to authenticate."};
+
+  m_authenticator.VerifyToken();
 }
 
 bool Client::HasAuth() {
@@ -284,9 +286,9 @@ std::vector<Conversation> Client::FetchConversations() {
     cpr::VerifySsl{m_authenticator.verify_ssl()}
   )};
 
-  if (response.error) {
+  if (response.error)
     throw request_error{response.GetError()};
-  }
+
 
   return JSONToConversation(response.json());
 }
@@ -307,6 +309,13 @@ Account Client::GetAccount() {
  */
 std::string Client::GetUsername() {
   return m_authenticator.GetUsername();
+}
+
+bool Client::SetUser(const std::string& username)
+{
+  if (m_authenticator.SetUser(username))
+    return m_authenticator.VerifyToken();
+  return false;
 }
 
 bool Client::HasPostedStatuses() const

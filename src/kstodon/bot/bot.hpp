@@ -57,8 +57,11 @@ std::vector<Status> FindComments() override {
         std::make_move_iterator(replies.end())
       );
     }
-    catch (const request_error& e) {
-      log(e.what());
+    catch (const std::exception& e)
+    {
+      const std::string error_message = e.what();
+      log(error_message);
+      m_last_error = error_message;
     }
   }
 
@@ -87,7 +90,9 @@ bool PostStatus(Status status = Status{}, std::vector<T> files = GetDefaultFiles
   }
   catch (const std::exception& e)
   {
-    log(e.what());
+    const std::string error_message = e.what();
+    log(error_message);
+    m_last_error = error_message;
   }
   return false;
 }
@@ -125,10 +130,30 @@ bool ReplyToStatus(Status status, std::string message = "", bool remove_id = tru
   return false;
 }
 
+const bool SetUser(const std::string& username)
+{
+  bool result = m_client.SetUser(username);
+  if (!result)
+    m_last_error = "Failed to set user " + username;
+
+  return result;
+}
+
+const std::string GetUsername()
+{
+  return m_client.GetUsername();
+}
+
+const std::string GetLastError() const
+{
+  return m_last_error;
+}
+
 private:
 Client           m_client;
 GenerateFunction m_gen_fn_ptr;
 ReplyFunction    m_rep_fn_ptr;
+std::string      m_last_error;
 };
 
 } // namespace kstodon
