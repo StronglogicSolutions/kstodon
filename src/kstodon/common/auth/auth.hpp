@@ -222,7 +222,7 @@ bool VerifyToken() {
 
   m_authenticated = false;
 
-  const std::string URL = BASE_URL + PATH.at(TOKEN_VERIFY_INDEX);
+  const std::string URL = m_base_url + PATH.at(TOKEN_VERIFY_INDEX);
 
   if (m_auth.is_valid()) {
     RequestResponse response{cpr::Get(
