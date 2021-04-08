@@ -132,7 +132,16 @@ bool ReplyToStatus(Status status, std::string message = "", bool remove_id = tru
 
 const bool SetUser(const std::string& username)
 {
-  return m_client.SetUser(username);
+  bool result = m_client.SetUser(username);
+  if (!result)
+    m_last_error = "Failed to set user " + username;
+
+  return result;
+}
+
+const std::string GetUsername()
+{
+  return m_client.GetUsername();
 }
 
 const std::string GetLastError() const
