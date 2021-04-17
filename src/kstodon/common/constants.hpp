@@ -27,16 +27,12 @@ const std::vector<std::string> HEADER_NAMES{
 "Authorization"
 };
 
-namespace MastodonOnline {
 const uint8_t TOKEN_INDEX        = 0x00;
 const uint8_t TOKEN_VERIFY_INDEX = 0x01;
 const uint8_t STATUSES_INDEX     = 0x02;
 const uint8_t ACCOUNTS_INDEX     = 0x03;
 const uint8_t MEDIA_INDEX        = 0x04;
 const uint8_t CONVERSATION_INDEX = 0x05;
-
-// const std::string BASE_URL{"https://bitcoinhackers.org"};
-const std::string BASE_URL{"https://mastodon.online"};
 
 const std::vector<std::string> PATH{
   "/oauth/token",
@@ -53,6 +49,5 @@ inline const std::string STATUS_CONTEXT_URL(const std::string& base_url, uint64_
   };
 }
 
-} // namespace MastodonOnline
 } // namespace constants
 } // namespace kstodon

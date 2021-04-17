@@ -1,8 +1,6 @@
 #include "client.hpp"
 
 namespace kstodon {
-using namespace constants::MastodonOnline;
-
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░ Helper FNs ░░░░░░░░░░░░░░░░░░░░░░│
@@ -95,7 +93,8 @@ bool Client::HasAuth() {
 Status Client::FetchStatus(uint64_t id) {
   using json = nlohmann::json;
 
-  const std::string STATUSES_URL = m_authenticator.GetBaseURL() + PATH.at(STATUSES_INDEX) + "/" + std::to_string(id);
+  const std::string STATUSES_URL =
+    m_authenticator.GetBaseURL() + constants::PATH.at(constants::STATUSES_INDEX) + "/" + std::to_string(id);
 
   cpr::Response r = cpr::Get(
     cpr::Url{STATUSES_URL}
@@ -124,7 +123,8 @@ Status Client::FetchStatus(uint64_t id) {
 std::vector<Status> Client::FetchUserStatuses(UserID id) {
   using json = nlohmann::json;
   // api/v1/accounts/:id/statuses
-  const std::string URL = m_authenticator.GetBaseURL() + PATH.at(ACCOUNTS_INDEX) + '/' + id + "/statuses";
+  const std::string URL =
+    m_authenticator.GetBaseURL() + constants::PATH.at(constants::ACCOUNTS_INDEX) + '/' + id + "/statuses";
 
   cpr::Response r = cpr::Get(
     cpr::Url{URL}
@@ -146,7 +146,8 @@ std::vector<Status> Client::FetchUserStatuses(UserID id) {
 std::vector<Status> Client::FetchChildStatuses(StatusID id) {
   using json = nlohmann::json;
 
-  const std::string URL = STATUS_CONTEXT_URL(m_authenticator.GetBaseURL(), id); // api/v1/accounts/:id/statuses
+  const std::string URL = constants::STATUS_CONTEXT_URL(m_authenticator.GetBaseURL(), id);
+  // api/v1/accounts/:id/statuses
 
   RequestResponse response{cpr::Get(
     cpr::Url{URL}
