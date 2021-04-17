@@ -187,13 +187,15 @@ std::string access_token;
 std::string token_type;
 std::string scope;
 std::string created_at;
+std::string base_url;
 
 bool is_valid() {
   return (
     !access_token.empty() &&
     !token_type.empty()   &&
     !scope.empty()        &&
-    !created_at.empty()
+    !created_at.empty()   &&
+    !base_url.empty()
   );
 }
 };
