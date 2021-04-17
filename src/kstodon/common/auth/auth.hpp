@@ -19,7 +19,7 @@ inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
     json_file.contains("name")          &&
     json_file.contains("website")       &&
     json_file.contains("redirect_uri")  &&
-    json_file.contains("scope")         &&
+    // json_file.contains("scope")         &&
     json_file.contains("client_id")     &&
     json_file.contains("client_secret") &&
     json_file.contains("vapid_key")     &&
@@ -73,7 +73,8 @@ inline bool ValidateAuthJSON(nlohmann::json json_file) {
     json_file.contains("access_token") &&
     json_file.contains("token_type")   &&
     json_file.contains("scope")        &&
-    json_file.contains("created_at")
+    json_file.contains("created_at")   &&
+    json_file.contains("base_url")
   );
 }
 
@@ -98,6 +99,7 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
     auth.token_type   =  GetJSONStringValue(json_file, "token_type");
     auth.scope        =  GetJSONStringValue(json_file, "scope");
     auth.created_at   =  std::to_string(GetJSONValue<uint32_t>(json_file, "created_at"));
+    auth.base_url     = GetJSONStringValue(json_file, "base_url");
   }
 
   return auth;
@@ -117,14 +119,12 @@ Authenticator(std::string username = "")
   auto config = GetConfigReader();
 
   if (username.empty()) {
-
     if (config.ParseError() < 0) {
       log("Error loading config");
       throw std::invalid_argument{"No configuration path"};
     }
 
     username = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
-
     if (username.empty()) {
       throw std::invalid_argument{"No username in config. Please provide a username"};
     }
@@ -134,10 +134,6 @@ Authenticator(std::string username = "")
   if (!verify_ssl.empty()) {
     m_verify_ssl = (verify_ssl == "true");
   }
-
-  auto base_url = config.GetString(constants::KSTODON_SECTION, constants::BASE_URL_KEY, "");
-  m_base_url = (base_url.empty()) ?
-    constants::MastodonOnline::BASE_URL : base_url;
 
   auto creds_path    = config.GetString(constants::KSTODON_SECTION, constants::CREDS_PATH_KEY, "");
   if (!creds_path.empty())
@@ -163,11 +159,10 @@ Authenticator(std::string username = "")
  * @returns [out] {bool}
  */
 bool FetchToken() {
-  using namespace constants::MastodonOnline;
   using json = nlohmann::json;
 
   const std::string AUTHORIZATION_CODE_GRANT_TYPE{"authorization_code"};
-  const std::string AUTH_URL = GetBaseURL() + PATH.at(TOKEN_INDEX);
+  const std::string AUTH_URL = GetBaseURL() + constants::PATH.at(constants::TOKEN_INDEX);
   std::string       response;
   std::string       status;
 
@@ -218,11 +213,10 @@ bool FetchToken() {
 
 bool VerifyToken() {
   using namespace constants;
-  using namespace constants::MastodonOnline;
 
   m_authenticated = false;
 
-  const std::string URL = m_base_url + PATH.at(TOKEN_VERIFY_INDEX);
+  const std::string URL = GetBaseURL() + PATH.at(TOKEN_VERIFY_INDEX);
 
   if (m_auth.is_valid()) {
     RequestResponse response{cpr::Get(
@@ -303,7 +297,7 @@ std::string GetUsername() {
 
 const std::string GetBaseURL() const
 {
-  return m_base_url;
+  return m_auth.base_url;
 }
 
 bool verify_ssl() {
@@ -322,8 +316,6 @@ json         m_token_json;
 json         m_credentials_json;
 std::string  m_tokens_path;
 bool         m_verify_ssl;
-std::string  m_base_url;
-
 };
 
 } // namespace kstodon
