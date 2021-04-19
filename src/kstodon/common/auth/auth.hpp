@@ -73,8 +73,7 @@ inline bool ValidateAuthJSON(nlohmann::json json_file) {
     json_file.contains("access_token") &&
     json_file.contains("token_type")   &&
     json_file.contains("scope")        &&
-    json_file.contains("created_at")   &&
-    json_file.contains("base_url")
+    json_file.contains("created_at")
   );
 }
 
@@ -167,7 +166,7 @@ bool FetchToken() {
   std::string       status;
 
   if (m_credentials.is_valid()) {
-    cpr::Response r = cpr::Post(
+    RequestResponse response{cpr::Post(
       cpr::Url{AUTH_URL},
       cpr::Body{std::string{
         "client_id=" + m_credentials.client_id +  "&" +
@@ -178,14 +177,15 @@ bool FetchToken() {
         "scope=" + m_credentials.scope
       }},
       cpr::VerifySsl{verify_ssl()}
-    );
+    )};
 
-    response = r.text;
-    status   = std::string{"Status code: " + r.status_code};
-
-    if (!response.empty()) {
-      json auth_json = json::parse(response, nullptr, constants::JSON_PARSE_NO_THROW);
+    if (response.error)
+      log(response.GetError());
+    else
+    {
+      json auth_json = response.json();
       Auth auth      = ParseAuthFromJSON(auth_json);
+      auth.base_url  = GetBaseURL();
 
       if (auth.is_valid()) {
         m_auth = auth;
@@ -193,17 +193,8 @@ bool FetchToken() {
         m_token_json["users"][m_username] = auth_json;
         SaveToFile(m_token_json.dump(), m_tokens_path);
         return true;
-      } else {
-        log("Failed to parse token");
       }
-    } else {
-      log("Token request failed");
     }
-    log(std::string{
-      "Failed to fetch token.\n"
-      "Code: "     + status + "\n"
-      "Response: " + response
-    });
   } else {
     log("Credentials are invalid");
   }
@@ -224,7 +215,7 @@ bool VerifyToken() {
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), GetBearerAuth()}
       },
-      cpr::VerifySsl{verify_ssl()}
+      cpr::VerifySsl{false}
     )};
 
     if (response.error)
@@ -233,6 +224,7 @@ bool VerifyToken() {
     {
       m_account = ParseAccountFromJSON(response.json());
       m_authenticated = m_account.is_valid();
+      m_authenticated = true;
     }
   }
 
