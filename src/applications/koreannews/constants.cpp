@@ -1,7 +1,7 @@
 #include "constants.hpp"
 
 namespace koreannews {
-const std::string NAME   {"koreannews"};
+const std::string NAME   {"kstyleyo"};
 const std::string SOURCES{"hacker-news,ars-technica,"
                           "crypto-coins-news,"
                           "recode,techradar,"
