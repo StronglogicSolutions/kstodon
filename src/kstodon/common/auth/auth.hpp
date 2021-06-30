@@ -124,15 +124,14 @@ Authenticator(std::string username = "")
     }
 
     username = config.GetString(constants::KSTODON_SECTION, constants::USER_CONFIG_KEY, "");
-    if (username.empty()) {
+    if (username.empty())
       throw std::invalid_argument{"No username in config. Please provide a username"};
-    }
   }
 
   auto verify_ssl = config.GetString(constants::KSTODON_SECTION, constants::VERIFY_SSL_KEY, "true");
-  if (!verify_ssl.empty()) {
+  if (!verify_ssl.empty())
     m_verify_ssl = (verify_ssl == "true");
-  }
+
 
   auto creds_path    = config.GetString(constants::KSTODON_SECTION, constants::CREDS_PATH_KEY, "");
   if (!creds_path.empty())
