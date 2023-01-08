@@ -81,7 +81,7 @@ bool PostStatus(Status status = Status{}, std::vector<T> files = GetDefaultFiles
     if constexpr(
       std::is_same_v<T, File> || std::is_same_v<T, std::string>
     )
-    return m_client.PostStatus(
+  return m_client.PostStatus(
       status.is_valid() ?
         status :
         m_gen_fn_ptr(),

@@ -165,7 +165,7 @@ bool FetchToken() {
   std::string       status;
 
   if (m_credentials.is_valid()) {
-    RequestResponse response{cpr::Post(
+    cpr::Response response = cpr::Post(
       cpr::Url{AUTH_URL},
       cpr::Body{std::string{
         "client_id=" + m_credentials.client_id +  "&" +
@@ -174,19 +174,20 @@ bool FetchToken() {
         "grant_type=" + AUTHORIZATION_CODE_GRANT_TYPE + "&" +
         "code=" + m_credentials.code + "&" +
         "scope=" + m_credentials.scope
-      }},
-      cpr::VerifySsl{verify_ssl()}
-    )};
+      }}//,
+      // cpr::VerifySsl{verify_ssl()}
+    );
 
-    if (response.error)
-      log(response.GetError());
+    if (response.error.code != cpr::ErrorCode::OK)
+      log(response.error.message);
     else
     {
-      json auth_json = response.json();
+      json auth_json = json::parse(response.text);
       Auth auth      = ParseAuthFromJSON(auth_json);
       auth.base_url  = GetBaseURL();
 
-      if (auth.is_valid()) {
+      if (auth.is_valid())
+      {
         m_auth = auth;
         m_authenticated = true;
         m_token_json["users"][m_username] = auth_json;
@@ -194,9 +195,10 @@ bool FetchToken() {
         return true;
       }
     }
-  } else {
-    log("Credentials are invalid");
   }
+  else
+    log("Credentials are invalid");
+
 
   return false;
 }
@@ -209,19 +211,18 @@ bool VerifyToken() {
   const std::string URL = GetBaseURL() + PATH.at(TOKEN_VERIFY_INDEX);
 
   if (m_auth.is_valid()) {
-    RequestResponse response{cpr::Get(
+    cpr::Response response = cpr::Get(
       cpr::Url{URL},
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), GetBearerAuth()}
-      },
-      cpr::VerifySsl{false}
-    )};
+      }
+    );
 
-    if (response.error)
-      kstodon::log(response.GetError());
+    if (response.error.code != cpr::ErrorCode::OK)
+      kstodon::log(response.error.message);
     else
     {
-      m_account = ParseAccountFromJSON(response.json());
+      m_account = ParseAccountFromJSON(json::parse(response.text));
       m_authenticated = m_account.is_valid();
       m_authenticated = true;
     }
@@ -231,15 +232,18 @@ bool VerifyToken() {
 }
 
 
-bool IsAuthenticated() {
+bool IsAuthenticated()
+{
   return m_authenticated;
 }
 
-bool HasValidToken() {
+bool HasValidToken()
+{
   return m_auth.is_valid();
 }
 
-void ClearToken() {
+void ClearToken()
+{
   m_auth = Auth{};
 }
 
