@@ -175,8 +175,7 @@ Media Client::PostMedia(File file) {
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
     },
-    file.multiformdata()//,
-    // cpr::VerifySsl{m_authenticator.verify_ssl()}
+    file.multiformdata()
   );
 
   if (r.status_code < 400) {

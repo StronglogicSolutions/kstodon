@@ -19,7 +19,6 @@ inline bool ValidateCredentialsJSON(nlohmann::json json_file) {
     json_file.contains("name")          &&
     json_file.contains("website")       &&
     json_file.contains("redirect_uri")  &&
-    // json_file.contains("scope")         &&
     json_file.contains("client_id")     &&
     json_file.contains("client_secret") &&
     json_file.contains("vapid_key")     &&
@@ -105,8 +104,6 @@ inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
 }
 
 
-
-
 class Authenticator {
 
 public:
@@ -174,8 +171,7 @@ bool FetchToken() {
         "grant_type=" + AUTHORIZATION_CODE_GRANT_TYPE + "&" +
         "code=" + m_credentials.code + "&" +
         "scope=" + m_credentials.scope
-      }}//,
-      // cpr::VerifySsl{verify_ssl()}
+      }}
     );
 
     if (response.error.code != cpr::ErrorCode::OK)
