@@ -23,27 +23,27 @@ int main(int argc, char** argv)
   std::vector<kstodon::File>      files  {};
   std::string            std_out{};
 
-  if (config.execute_bot)                               // BOT MODE
-  {
-    std::vector<kstodon::Conversation> replies = bot.FindReplies();
+  // if (config.execute_bot)                               // BOT MODE
+  // {
+  //   std::vector<kstodon::Conversation> replies = bot.FindReplies();
 
-    for (const kstodon::Conversation& reply : replies)
-    {
-      if (reply.status.is_valid())
-        (bot.ReplyToStatus(reply.status)) ?
-          stats.tx_msg++ : stats.tx_err++;              // tx or err
-      stats.rx_msg++;                                   // rx
-    }
-  }
-  else                                                  // NORMAL MODE
-  {
-    if (!config.file_paths.empty())
-      for (const auto& path : config.file_paths)
-        files.emplace_back(kstodon::File{path});
+  //   for (const kstodon::Conversation& reply : replies)
+  //   {
+  //     if (reply.status.is_valid())
+  //       (bot.ReplyToStatus(reply.status)) ?
+  //         stats.tx_msg++ : stats.tx_err++;              // tx or err
+  //     stats.rx_msg++;                                   // rx
+  //   }
+  // }
+  // else                                                  // NORMAL MODE
+  // {
+  if (!config.file_paths.empty())
+    for (const auto& path : config.file_paths)
+      files.emplace_back(kstodon::File{path});
 
-    (bot.PostStatus(kstodon::Status{config.message}, files)) ?
-      stats.tx_msg++ : stats.tx_err++;                  // tx or err
-  }
+  (bot.PostStatus(kstodon::Status{config.message}, files)) ?
+    stats.tx_msg++ : stats.tx_err++;                  // tx or err
+  // }
 
   std_out += "Bot execution complete:\n" + stats.to_string();
 

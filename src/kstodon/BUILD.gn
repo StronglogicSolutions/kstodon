@@ -71,11 +71,6 @@ source_set("kstodon_sources") {
     "//src",
   ]
 
-  libs = [
-    "crypto",
-    "curl",
-  ]
-
   sources = [
     "//src/kstodon/client/client.cpp"
   ]
@@ -90,12 +85,6 @@ executable("kstodon") {
     "//src",
   ]
 
-  libs = [
-    "pthread",
-    "crypto",
-    "curl"
-  ]
-
   sources = [
     "//src/kstodon/main.cpp"
   ]
@@ -108,12 +97,6 @@ shared_library("kstodon_lib") {
 
   include_dirs = [
     "//src",
-  ]
-
-  libs = [
-    "pthread",
-    "crypto",
-    "curl"
   ]
 
   sources = [

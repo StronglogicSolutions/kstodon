@@ -149,14 +149,14 @@ std::vector<Status> Client::FetchChildStatuses(StatusID id) {
   const std::string URL = constants::STATUS_CONTEXT_URL(m_authenticator.GetBaseURL(), id);
   // api/v1/accounts/:id/statuses
 
-  RequestResponse response{cpr::Get(
+  cpr::Response response = cpr::Get(
     cpr::Url{URL}
-  )};
+  );
 
-  if (response.error)
-    throw request_error{response.GetError()};
+  if (response.error.code != cpr::ErrorCode::OK)
+    throw request_error{response.error.message};
 
-  return JSONContextToStatuses(response.json());
+  return JSONContextToStatuses(json::parse(response.text));
 }
 
 /**
@@ -175,8 +175,7 @@ Media Client::PostMedia(File file) {
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
     },
-    file.multiformdata(),
-    cpr::VerifySsl{m_authenticator.verify_ssl()}
+    file.multiformdata()
   );
 
   if (r.status_code < 400) {
@@ -205,25 +204,19 @@ bool Client::PostStatus(Status status) {
   for (const auto& message : messages) {
     Status outgoing_status = Status::create_instance_with_message(status, message, reply_to_id);
 
-    RequestResponse response{cpr::Post(
+    cpr::Response response = cpr::Post(
       cpr::Url{URL},
       cpr::Header{
         {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
       },
-      cpr::Body{outgoing_status.postdata()},
-      cpr::VerifySsl{m_authenticator.verify_ssl()}
-    )};
+      cpr::Body{outgoing_status.postdata()}
+    );
 
-    if (response.error)
-      throw request_error(response.GetError());
+    if (response.error.code != cpr::ErrorCode::OK)
+      throw request_error(response.error.message);
 
-    Status returned_status = JSONToStatus(response.json());
-
-    if (returned_status.content.empty())
-      return false;
-
+    Status returned_status = JSONToStatus(json::parse(response.text));
     m_statuses.emplace_back(std::move(returned_status));
-
     reply_to_id = std::to_string(returned_status.id);
   }
 
@@ -279,19 +272,18 @@ std::vector<Conversation> Client::FetchConversations() {
 
   const std::string CONVERSATION_URL = m_authenticator.GetBaseURL() + PATH.at(CONVERSATION_INDEX);
 
-  RequestResponse response{cpr::Get(
+  cpr::Response response = cpr::Get(
     cpr::Url{CONVERSATION_URL},
     cpr::Header{
       {HEADER_NAMES.at(HEADER_AUTH_INDEX), m_authenticator.GetBearerAuth()}
-    },
-    cpr::VerifySsl{m_authenticator.verify_ssl()}
-  )};
+    }
+  );
 
-  if (response.error)
-    throw request_error{response.GetError()};
+  if (response.error.code != cpr::ErrorCode::OK)
+    throw request_error{response.error.message};
 
 
-  return JSONToConversation(response.json());
+  return JSONToConversation(json::parse(response.text));
 }
 
 /**
