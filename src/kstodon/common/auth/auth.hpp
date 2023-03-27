@@ -34,9 +34,9 @@ inline bool JSONHasUser(nlohmann::json data, std::string username) {
   return (!data.is_null() && data.is_object() && data.contains(username));
 }
 
-inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username) {
+inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::string username)
+{
   using json = nlohmann::json;
-  using namespace kjson;
 
   Credentials creds{};
 
@@ -50,15 +50,15 @@ inline Credentials ParseCredentialsFromJSON(nlohmann::json json_file, std::strin
 
       json user_json = users_json[username];
 
-      creds.id =            GetJSONStringValue(user_json, "id");
-      creds.name =          GetJSONStringValue(user_json, "name");
-      creds.website =       GetJSONStringValue(user_json, "website");
-      creds.redirect_uri =  GetJSONStringValue(user_json, "redirect_uri");
-      creds.scope        =  GetJSONStringValue(user_json, "scope");
-      creds.client_id =     GetJSONStringValue(user_json, "client_id");
-      creds.client_secret = GetJSONStringValue(user_json, "client_secret");
-      creds.vapid_key =     GetJSONStringValue(user_json, "vapid_key");
-      creds.code =          GetJSONStringValue(user_json, "code");
+      creds.id =            user_json["id"].get<std::string>();
+      creds.name =          user_json["name"].get<std::string>();
+      creds.website =       user_json["website"].get<std::string>();
+      creds.redirect_uri =  user_json["redirect_uri"].get<std::string>();
+      creds.scope        =  user_json["scope"].get<std::string>();
+      creds.client_id =     user_json["client_id"].get<std::string>();
+      creds.client_secret = user_json["client_secret"].get<std::string>();
+      creds.vapid_key =     user_json["vapid_key"].get<std::string>();
+      creds.code =          user_json["code"].get<std::string>();
     }
   }
 
@@ -88,16 +88,15 @@ inline std::string AuthToJSON(Auth auth) {
 
 inline Auth ParseAuthFromJSON(nlohmann::json json_file) {
   using json = nlohmann::json;
-  using namespace kjson;
 
-  Auth auth{};
-
-  if (ValidateAuthJSON(json_file)) {
-    auth.access_token =  GetJSONStringValue(json_file, "access_token");
-    auth.token_type   =  GetJSONStringValue(json_file, "token_type");
-    auth.scope        =  GetJSONStringValue(json_file, "scope");
-    auth.created_at   =  std::to_string(GetJSONValue<uint32_t>(json_file, "created_at"));
-    auth.base_url     = GetJSONStringValue(json_file, "base_url");
+  Auth auth;
+  if (ValidateAuthJSON(json_file))
+  {
+    auth.access_token = json_file["access_token"].get<std::string>();
+    auth.token_type   = json_file["token_type"]  .get<std::string>();
+    auth.scope        = json_file["scope"]       .get<std::string>();
+    auth.created_at   = std::to_string(json_file["created_at"].get<uint32_t>());
+    auth.base_url     = json_file["base_url"]    .get<std::string>();
   }
 
   return auth;

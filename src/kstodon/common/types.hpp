@@ -4,8 +4,6 @@
 #include <string>
 #include <unordered_map>
 #include <cpr/cpr.h>
-#include <kjson.hpp>
-
 #include "util.hpp"
 
 namespace kstodon {
