@@ -86,36 +86,36 @@ inline bool RemoveStatusID(std::string username, uint64_t id) {
   return result;
 }
 
-inline Account ParseAccountFromJSON(nlohmann::json data) {
-
+inline Account ParseAccountFromJSON(nlohmann::json data)
+{
   Account account{};
 
   if (!data.is_null()) {
-    account.id              = GetJSONStringValue(data, "id");
-    account.username        = GetJSONStringValue(data, "username");
-    account.acct            = GetJSONStringValue(data, "acct");
-    account.display_name    = GetJSONStringValue(data, "display_name");
-    account.locked          = GetJSONBoolValue  (data, "locked");
-    account.bot             = GetJSONBoolValue  (data, "bot");
-    account.discoverable    = GetJSONBoolValue  (data, "discoverable");
-    account.group           = GetJSONBoolValue  (data, "group");
-    account.created_at      = GetJSONStringValue(data, "created_at");
-    account.note            = GetJSONStringValue(data, "note");
-    account.url             = GetJSONStringValue(data, "url");
-    account.avatar          = GetJSONStringValue(data, "avatar");
-    account.header          = GetJSONStringValue(data, "header");
-    account.locked          = GetJSONBoolValue  (data, "locked");
-    account.last_status_at  = GetJSONStringValue(data, "last_status_at");
-    account.followers_count = GetJSONValue<uint32_t>(data, "followers_count");
-    account.following_count = GetJSONValue<uint32_t>(data, "following_count");
-    account.statuses_count  = GetJSONValue<uint32_t>(data, "statuses_count");
+    account.id              = data["id"]             .get<std::string>();
+    account.username        = data["username"]       .get<std::string>();
+    account.acct            = data["acct"]           .get<std::string>();
+    account.display_name    = data["display_name"]   .get<std::string>();
+    account.locked          = data["locked"]         .get<bool>();
+    account.bot             = data["bot"]            .get<bool>();
+    account.discoverable    = data["discoverable"]   .get<bool>();
+    account.group           = data["group"]          .get<bool>();
+    account.created_at      = data["created_at"]     .get<std::string>();
+    account.note            = data["note"]           .get<std::string>();
+    account.url             = data["url"]            .get<std::string>();
+    account.avatar          = data["avatar"]         .get<std::string>();
+    account.header          = data["header"]         .get<std::string>();
+    account.locked          = data["locked"]         .get<bool>();
+    account.last_status_at  = data["last_status_at"] .get<std::string>();
+    account.followers_count = data["followers_count"].get<uint32_t>();
+    account.following_count = data["following_count"].get<uint32_t>();
+    account.statuses_count  = data["statuses_count"] .get<uint32_t>();
 
     nlohmann::json fields = data["source"]["fields"];
 
     for (const auto& field : fields) {
       account.fields.emplace_back(AccountField{
-        .name  = GetJSONStringValue(field, "name"),
-        .value = GetJSONStringValue(field, "value")
+        .name  = field["name"].get<std::string>(),
+        .value = field["value"].get<std::string>()
       });
     }
   }
@@ -155,36 +155,36 @@ inline std::vector<Mention> ParseMentionsFromJSON(nlohmann::json data) {
   return mentions;
 }
 
-inline Media ParseMediaFromJSON(nlohmann::json data) {
-
+inline Media ParseMediaFromJSON(nlohmann::json data)
+{
   Media media{};
 
   if (!data.is_null() && data.is_object()) {
-    media.id                 = GetJSONStringValue(data, "id");
-    media.type               = GetJSONStringValue(data, "type");
-    media.url                = GetJSONStringValue(data, "url");
-    media.preview_url        = GetJSONStringValue(data, "preview_url");
-    media.remote_url         = GetJSONStringValue(data, "remote_url");
-    media.preview_remote_url = GetJSONStringValue(data, "preview_remote_url");
-    media.text_url           = GetJSONStringValue(data, "text_url");
-    media.description        = GetJSONStringValue(data, "description");
-    media.blurhash           = GetJSONStringValue(data, "blurhash");
+    media.id                 = data["id"].get<std::string>();
+    media.type               = data["type"].get<std::string>();
+    media.url                = data["url"].get<std::string>();
+    media.preview_url        = data["preview_url"].get<std::string>();
+    media.remote_url         = data["remote_url"].get<std::string>();
+    media.preview_remote_url = data["preview_remote_url"].get<std::string>();
+    media.text_url           = data["text_url"].get<std::string>();
+    media.description        = data["description"].get<std::string>();
+    media.blurhash           = data["blurhash"].get<std::string>();
     media.meta               = MediaMetadata{};
 
     if (data["meta"].contains("original")) {
       auto original = data["meta"]["original"];
 
       media.meta.original = MetaDetails{
-        .width    = GetJSONValue<uint32_t>(original, "width"),
-        .height   = GetJSONValue<uint32_t>(original, "height"),
-        .size     = GetJSONStringValue(original, "size"),
-        .aspect   = GetJSONValue<float>(original, "aspect")
+        .width    = original["width"].get<uint32_t>(),
+        .height   = original["height"].get<uint32_t>(),
+        .size     = original["size"].get<std::string>(),
+        .aspect   = original["aspect"].get<float>()
       };
     }
 
-    if (data["meta"].contains("small")) {
+    if (data["meta"].contains("small"))
+    {
       auto small = data["meta"]["small"];
-
       media.meta.small = MetaDetails{
         .width    = small["width"],
         .height   = small["height"],
@@ -214,11 +214,9 @@ inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
   std::string s = data.dump();
 
   if (!data.is_null() && data.is_array()) {
-    for (const auto& item : data) {
-      if (!item.is_null() && item.is_object()) {
+    for (const auto& item : data)
+      if (!item.is_null() && item.is_object())
         accounts.emplace_back(ParseAccountFromJSON(item));
-      }
-    }
   }
   return accounts;
 }
@@ -229,69 +227,70 @@ inline std::vector<Account> ParseAccountsFromJSON(nlohmann::json data) {
  * @param data
  * @return Status
  */
-inline Status JSONToStatus(nlohmann::json data) {
-
+inline Status JSONToStatus(nlohmann::json data)
+{
   Status status{};
   std::string s = data.dump();
   try {
-    if (!data.is_null() && data.is_object()) {
-    status.id                  = std::stoul(data["id"].get<std::string>());
-    status.created_at          = GetJSONStringValue    (data, "created_at");
-    status.replying_to_id      = GetJSONStringValue    (data, "in_reply_to_id");
-    status.replying_to_account = GetJSONStringValue    (data, "in_reply_to_account_id");
-    status.sensitive           = GetJSONBoolValue      (data, "sensitive");
-    status.spoiler             = GetJSONStringValue    (data, "spoiler_text");
-    status.visibility          = GetJSONStringValue    (data, "visibility");
-    status.language            = GetJSONStringValue    (data, "language");
-    status.uri                 = GetJSONStringValue    (data, "uri");
-    status.url                 = GetJSONStringValue    (data, "url");
-    status.replies             = GetJSONValue<uint32_t>(data, "replies_count");
-    status.reblogs             = GetJSONValue<uint32_t>(data, "reblogs_count");
-    status.favourites          = GetJSONValue<uint32_t>(data, "favourites_count");
-    status.content             = GetJSONStringValue    (data, "content");
-    status.reblog              = ParseAccountFromJSON  (data["reblog"]);;
-    status.application.name    = GetJSONStringValue    (data["application"], "name");
-    status.application.url     = GetJSONStringValue    (data["application"], "website");
-    status.account             = ParseAccountFromJSON  (data["account"]);
-    status.media               = ParseMediaFromJSONArr (data["media_attachments"]);
-    status.mentions            = ParseMentionsFromJSON (data["mentions"]);
-    status.tags                = ParseTagsFromJSON     (data["tags"]);
-    status.emojis              = GetJSONValue<std::vector<std::string>>(data, "emojis");
-  }
+    if (!data.is_null() && data.is_object())
+    {
+      status.id                  = std::stoul(data["id"].get<std::string>());
+      status.created_at          = data["created_at"].get<std::string>();
+      status.replying_to_id      = data["in_reply_to_id"].get<std::string>();
+      status.replying_to_account = data["in_reply_to_account_id"].get<std::string>();
+      status.sensitive           = data["sensitive"].get<bool>();
+      status.spoiler             = data["spoiler_text"].get<std::string>();
+      status.visibility          = data["visibility"].get<std::string>();
+      status.language            = data["language"].get<std::string>();
+      status.uri                 = data["uri"].get<std::string>();
+      status.url                 = data["url"].get<std::string>();
+      status.replies             = data["replies_count"].get<uint32_t>();
+      status.reblogs             = data["reblogs_count"].get<uint32_t>();
+      status.favourites          = data["favourites_count"].get<uint32_t>();
+      status.content             = data["content"].get<std::string>();
+      status.reblog              = ParseAccountFromJSON  (data["reblog"]);;
+      status.application.name    = data["application"]["name"].get<std::string>();
+      status.application.url     = data["application"]["website"].get<std::string>();
+      status.account             = ParseAccountFromJSON  (data["account"]);
+      status.media               = ParseMediaFromJSONArr (data["media_attachments"]);
+      status.mentions            = ParseMentionsFromJSON (data["mentions"]);
+      status.tags                = ParseTagsFromJSON     (data["tags"]);
+      status.emojis              = data["emojis"].get<std::vector<std::string>>();
+    }
 
-  return status;
-  } catch (std::exception& e) {
+    return status;
+  }
+  catch (std::exception& e)
+  {
     std::cout << e.what();
   }
   return status;
 }
 
-inline std::vector<Status> JSONToStatuses(nlohmann::json data) {
+inline std::vector<Status> JSONToStatuses(nlohmann::json data)
+{
   std::vector<Status> statuses{};
   if (!data.is_null() && data.is_array())
     for (const auto& status_data : data)
-    {
-      Status status = JSONToStatus(status_data);
-      if (status.is_valid())
+      if (Status status = JSONToStatus(status_data); status.is_valid())
         statuses.emplace_back(status);
-    }
-
   return statuses;
 }
 
 
-inline std::vector<Status> JSONContextToStatuses(nlohmann::json data) {
+inline std::vector<Status> JSONContextToStatuses(nlohmann::json data)
+{
   std::vector<Status> statuses{};
   std::string s = data.dump();
 
   try {
-    for (const auto& context : data) {
+    for (const auto& context : data)
+    {
       auto new_statuses = JSONToStatuses(context);
       statuses.insert(
         statuses.end(),
         std::make_move_iterator(new_statuses.begin()),
-        std::make_move_iterator(new_statuses.end())
-      );
+        std::make_move_iterator(new_statuses.end()));
     }
   }
   catch (const std::exception& e) {
@@ -301,18 +300,21 @@ inline std::vector<Status> JSONContextToStatuses(nlohmann::json data) {
 
   return statuses;
 }
-inline std::vector<Conversation> JSONToConversation(nlohmann::json data) {
-
+inline std::vector<Conversation> JSONToConversation(nlohmann::json data)
+{
   std::vector<Conversation> conversations{};
 
-  if (!data.is_null() && data.is_array()) {
-    for (const auto& item : data) {
-      if (!item.is_null() && item.is_object()) {
+  if (!data.is_null() && data.is_array())
+  {
+    for (const auto& item : data)
+    {
+      if (!item.is_null() && item.is_object())
+      {
         std::string s = item.dump();
         conversations.emplace_back(
           Conversation{
-            .id       = GetJSONStringValue(item, "id"),
-            .unread   = GetJSONBoolValue(item, "unread"),
+            .id       = item["id"].get<std::string>(),
+            .unread   = item["unread"].get<bool>(),
             .status   = JSONToStatus(item["last_status"]),
             .accounts = ParseAccountsFromJSON(item["accounts"])
           }

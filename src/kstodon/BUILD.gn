@@ -1,6 +1,5 @@
-config("kjson") {
+config("json") {
   include_dirs = [
-    "//third_party/kjson",
     "//third_party/json/include",
   ]
 }
@@ -59,7 +58,7 @@ source_set("kstodon_sources") {
 
   public_configs = [
     ":inih",
-    ":kjson",
+    ":json",
     ":html",
     ":knlp"
   ]
