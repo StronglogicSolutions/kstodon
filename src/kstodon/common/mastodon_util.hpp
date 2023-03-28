@@ -97,7 +97,7 @@ inline Account ParseAccountFromJSON(nlohmann::json data)
     account.display_name    = data["display_name"]   .get<std::string>();
     account.locked          = data["locked"]         .get<bool>();
     account.bot             = data["bot"]            .get<bool>();
-    account.discoverable    = data["discoverable"]   .get<bool>();
+    // account.discoverable    = data["discoverable"]   .get<bool>();
     account.group           = data["group"]          .get<bool>();
     account.created_at      = data["created_at"]     .get<std::string>();
     account.note            = data["note"]           .get<std::string>();
@@ -300,6 +300,7 @@ inline std::vector<Status> JSONContextToStatuses(nlohmann::json data)
 
   return statuses;
 }
+
 inline std::vector<Conversation> JSONToConversation(nlohmann::json data)
 {
   std::vector<Conversation> conversations{};
