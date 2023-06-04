@@ -90,7 +90,7 @@ inline Account ParseAccountFromJSON(nlohmann::json data)
 {
   Account account{};
 
-  if (!data.is_null()) {
+  if (data.type() != nlohmann::detail::value_t::discarded && !data.is_null()) {
     account.id              = data["id"]             .get<std::string>();
     account.username        = data["username"]       .get<std::string>();
     account.acct            = data["acct"]           .get<std::string>();
