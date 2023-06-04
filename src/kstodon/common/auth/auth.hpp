@@ -217,7 +217,7 @@ bool VerifyToken() {
       kstodon::log(response.error.message);
     else
     {
-      m_account = ParseAccountFromJSON(json::parse(response.text));
+      m_account = ParseAccountFromJSON(json::parse(response.text, nullptr, false));
       m_authenticated = m_account.is_valid();
       m_authenticated = true;
     }
